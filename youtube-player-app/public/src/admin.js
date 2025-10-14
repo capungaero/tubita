@@ -80,7 +80,8 @@ let videoList = JSON.parse(localStorage.getItem('videoList')) || [];
 let settings = JSON.parse(localStorage.getItem('settings')) || {
     timeLimit: 30,
     password: 'admin123',
-    warningTime: 5
+    warningTime: 5,
+    maxVideosPerSession: 3
 };
 
 // Load dummy videos with API data on first run
@@ -123,6 +124,7 @@ const statusMessage = document.getElementById('statusMessage');
 const timeLimitInput = document.getElementById('timeLimitMinutes');
 const adminPasswordInput = document.getElementById('adminPassword');
 const warningTimeInput = document.getElementById('warningTime');
+const maxVideosInput = document.getElementById('maxVideosPerSession');
 
 // Navigation
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -290,6 +292,7 @@ window.playVideo = function(videoId) {
 document.getElementById('saveSettings').addEventListener('click', () => {
     settings.timeLimit = parseInt(timeLimitInput.value) || 30;
     settings.warningTime = parseInt(warningTimeInput.value) || 5;
+    settings.maxVideosPerSession = parseInt(maxVideosInput.value) || 3;
     
     const newPassword = adminPasswordInput.value.trim();
     if (newPassword) {
@@ -328,6 +331,7 @@ document.getElementById('resetForm').addEventListener('click', () => {
 function loadSettings() {
     timeLimitInput.value = settings.timeLimit;
     warningTimeInput.value = settings.warningTime;
+    maxVideosInput.value = settings.maxVideosPerSession || 3;
 }
 
 // Save to localStorage

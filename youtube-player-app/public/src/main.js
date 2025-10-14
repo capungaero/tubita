@@ -6,181 +6,200 @@ let videoList = JSON.parse(localStorage.getItem('videoList')) || [];
 let settings = JSON.parse(localStorage.getItem('settings')) || {
     timeLimit: 30,
     password: 'admin123',
-    warningTime: 5
+    warningTime: 5,
+    maxVideosPerSession: 3  // NEW: max videos anak bisa pilih
 };
 
+// Session data
+let currentUser = null;
+let selectedVideos = [];
 let currentVideoIndex = 0;
 let player = null;
 let watchTimer = null;
 let watchedTime = 0;
 let warningShown = false;
+let sessionActive = false;
 
 // Mouse lock feature
-let mouseLocked = true; // Default locked on page load
-let mouseUnlockKey = 'F2'; // Ctrl+F2 to unlock
+let mouseLocked = true;
+let mouseUnlockKey = 'F2';
 
 // DOM Elements
 const videoContainer = document.getElementById('video-container');
-const warningModal = document.getElementById('warning-modal');
-const passwordPrompt = document.getElementById('password-prompt');
+const loginPopup = document.getElementById('login-popup');
+const endSessionModal = document.getElementById('end-session-modal');
+const usernameInput = document.getElementById('username');
+const videoSelectionGrid = document.getElementById('video-selection');
+const startWatchingBtn = document.getElementById('start-watching');
+const selectedCountSpan = document.getElementById('selected-count');
+const maxVideosSpans = document.querySelectorAll('#max-videos, #max-videos-2');
+const unlockPasswordInput = document.getElementById('unlock-password');
+const unlockBtn = document.getElementById('unlock-btn');
+const unlockError = document.getElementById('unlock-error');
 
-// Initialize mouse lock on page load
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    enableMouseLock();
-    setupMouseUnlockListener();
+    initializeApp();
 });
 
-// Initialize YouTube Player API
-function onYouTubeIframeAPIReady() {
-    initializePlayer();
+// Initialize the application
+function initializeApp() {
+    // Enable mouse lock by default
+    enableMouseLock();
+    setupMouseUnlockListener();
+    
+    // Show login popup
+    showLoginPopup();
+    
+    // Setup event listeners
+    setupLoginListeners();
 }
 
-// Make function globally available for YouTube API
-window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
-
-// Enable mouse lock - disable all clicks
-function enableMouseLock() {
-    mouseLocked = true;
-    document.body.style.cursor = 'not-allowed';
-    document.body.classList.add('mouse-locked');
-    
-    // Show lock indicator (top right only)
-    showLockIndicator();
-    
-    // Create invisible overlay to block all clicks
-    const overlay = document.createElement('div');
-    overlay.id = 'mouse-lock-overlay';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        z-index: 999999;
-        cursor: not-allowed;
-        pointer-events: all;
-    `;
-    
-    // Prevent all clicks
-    overlay.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
-    
-    overlay.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
-    
-    document.body.appendChild(overlay);
+// Show login popup
+function showLoginPopup() {
+    loginPopup.classList.add('active');
+    loadAvailableVideos();
+    updateMaxVideosDisplay();
 }
 
-// Disable mouse lock
-function disableMouseLock() {
-    mouseLocked = false;
-    document.body.style.cursor = '';
-    document.body.classList.remove('mouse-locked');
-    
-    // Remove overlay
-    const overlay = document.getElementById('mouse-lock-overlay');
-    if (overlay) {
-        overlay.remove();
+// Load available videos for selection
+function loadAvailableVideos() {
+    if (videoList.length === 0) {
+        videoSelectionGrid.innerHTML = '<p style="text-align:center; padding: 20px;">Tidak ada video. Silakan tambahkan video di Admin Panel.</p>';
+        return;
     }
     
-    // Show unlock notification
-    showUnlockNotification();
+    videoSelectionGrid.innerHTML = '';
+    
+    videoList.forEach((video, index) => {
+        const videoCard = document.createElement('div');
+        videoCard.className = 'video-card-select';
+        videoCard.dataset.index = index;
+        videoCard.dataset.videoId = video.id;
+        
+        videoCard.innerHTML = \`
+            <img src="\${video.thumbnail}" alt="\${video.title}" class="video-thumbnail">
+            <div class="video-info">
+                <div class="video-title">\${video.title}</div>
+            </div>
+            <div class="check-mark"><i class="fas fa-check"></i></div>
+        \`;
+        
+        videoCard.addEventListener('click', () => toggleVideoSelection(videoCard, video));
+        videoSelectionGrid.appendChild(videoCard);
+    });
 }
 
-// Show lock indicator
-function showLockIndicator() {
-    // Remove existing indicator if any
-    const existingIndicator = document.getElementById('lock-indicator');
-    if (existingIndicator) {
-        existingIndicator.remove();
+// Toggle video selection
+function toggleVideoSelection(card, video) {
+    const isSelected = card.classList.contains('selected');
+    const maxVideos = settings.maxVideosPerSession || 3;
+    
+    if (isSelected) {
+        // Deselect
+        card.classList.remove('selected');
+        selectedVideos = selectedVideos.filter(v => v.id !== video.id);
+    } else {
+        // Check if max limit reached
+        if (selectedVideos.length >= maxVideos) {
+            alert(\`Maksimal hanya \${maxVideos} video yang bisa dipilih!\`);
+            return;
+        }
+        
+        // Select
+        card.classList.add('selected');
+        selectedVideos.push(video);
     }
     
-    const indicator = document.createElement('div');
-    indicator.id = 'lock-indicator';
-    indicator.innerHTML = '🔒';
-    indicator.style.cssText = `
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        background: rgba(255, 0, 0, 0.9);
-        color: white;
-        padding: 12px 15px;
-        border-radius: 50%;
-        font-size: 24px;
-        z-index: 1000000;
-        box-shadow: 0 3px 15px rgba(0,0,0,0.4);
-        cursor: not-allowed;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 50px;
-        animation: blink 2s ease-in-out infinite;
-    `;
-    document.body.appendChild(indicator);
+    updateSelectedCount();
+}
+
+// Update selected count display
+function updateSelectedCount() {
+    const maxVideos = settings.maxVideosPerSession || 3;
+    selectedCountSpan.textContent = selectedVideos.length;
     
-    // Add blink animation if not exists
-    if (!document.getElementById('blink-animation')) {
-        const style = document.createElement('style');
-        style.id = 'blink-animation';
-        style.innerHTML = `
-            @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.6; }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-}
-
-// Show unlock notification (simplified)
-function showUnlockNotification() {
-    // Just remove lock indicator
-    const lockIndicator = document.getElementById('lock-indicator');
-    if (lockIndicator) {
-        lockIndicator.remove();
-    }
-}
-
-// Setup keyboard listener for Ctrl+F2
-function setupMouseUnlockListener() {
-    document.addEventListener('keydown', (e) => {
-        // Check for Ctrl+F2
-        if (e.ctrlKey && e.key === 'F2') {
-            e.preventDefault();
-            
-            if (mouseLocked) {
-                disableMouseLock();
-            } else {
-                enableMouseLock();
-            }
+    // Enable/disable start button
+    startWatchingBtn.disabled = selectedVideos.length === 0 || !usernameInput.value.trim();
+    
+    // Disable unselected videos if max reached
+    const allCards = document.querySelectorAll('.video-card-select');
+    allCards.forEach(card => {
+        if (!card.classList.contains('selected') && selectedVideos.length >= maxVideos) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
         }
     });
 }
 
-// Initialize the player
-async function initializePlayer() {
-    if (videoList.length === 0) {
-        showEmptyState();
+// Update max videos display
+function updateMaxVideosDisplay() {
+    const maxVideos = settings.maxVideosPerSession || 3;
+    maxVideosSpans.forEach(span => {
+        span.textContent = maxVideos;
+    });
+}
+
+// Setup login event listeners
+function setupLoginListeners() {
+    // Username input
+    usernameInput.addEventListener('input', () => {
+        updateSelectedCount();
+    });
+    
+    // Start watching button
+    startWatchingBtn.addEventListener('click', startWatchingSession);
+    
+    // Unlock button
+    unlockBtn.addEventListener('click', unlockSession);
+    
+    // Enter key on password
+    unlockPasswordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            unlockSession();
+        }
+    });
+}
+
+// Start watching session
+function startWatchingSession() {
+    const username = usernameInput.value.trim();
+    
+    if (!username) {
+        alert('Masukkan nama kamu!');
         return;
     }
     
-    // Get video ID from URL parameter or use first video
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoIdParam = urlParams.get('v');
+    if (selectedVideos.length === 0) {
+        alert('Pilih minimal 1 video!');
+        return;
+    }
     
-    if (videoIdParam) {
-        const index = videoList.findIndex(v => v.id === videoIdParam);
-        if (index !== -1) {
-            currentVideoIndex = index;
-        }
+    // Save session data
+    currentUser = username;
+    sessionActive = true;
+    currentVideoIndex = 0;
+    watchedTime = 0;
+    
+    // Hide login popup
+    loginPopup.classList.remove('active');
+    
+    // Start playing videos
+    initializePlayer();
+}
+
+// Initialize YouTube Player API
+function onYouTubeIframeAPIReady() {
+    // Will be called when player is ready
+}
+
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+// Initialize the player
+function initializePlayer() {
+    if (selectedVideos.length === 0) {
+        return;
     }
     
     loadVideo(currentVideoIndex);
@@ -188,16 +207,17 @@ async function initializePlayer() {
 
 // Load and play video
 function loadVideo(index) {
-    if (index < 0 || index >= videoList.length) {
-        showEmptyState();
+    if (index < 0 || index >= selectedVideos.length) {
+        // All videos finished
+        endWatchingSession('Semua video dalam playlist telah selesai diputar!');
         return;
     }
     
     currentVideoIndex = index;
-    const video = videoList[currentVideoIndex];
+    const video = selectedVideos[currentVideoIndex];
     
     // Create player container
-    videoContainer.innerHTML = `
+    videoContainer.innerHTML = \`
         <div class="video-player-wrapper">
             <div id="player" class="youtube-player-container">
                 <div id="customPlayButton" class="custom-play-button">
@@ -205,31 +225,21 @@ function loadVideo(index) {
                 </div>
             </div>
             <div class="video-details">
-                <h2>${video.title}</h2>
-                ${video.channelTitle ? `<p class="channel-name"><i class="fas fa-user-circle"></i> ${video.channelTitle}</p>` : ''}
+                <h2>\${video.title}</h2>
+                \${video.channelTitle ? \`<p class="channel-name"><i class="fas fa-user-circle"></i> \${video.channelTitle}</p>\` : ''}
                 <div class="video-controls">
-                    <button id="playPauseBtn" class="control-btn">
-                        <i class="fas fa-pause"></i> <span id="playPauseText">Pause</span>
-                    </button>
-                    <button id="prevBtn" class="control-btn" ${currentVideoIndex === 0 ? 'disabled' : ''}>
-                        <i class="fas fa-step-backward"></i> Previous
-                    </button>
-                    <button id="nextBtn" class="control-btn" ${currentVideoIndex === videoList.length - 1 ? 'disabled' : ''}>
-                        Next <i class="fas fa-step-forward"></i>
-                    </button>
-                    <a href="admin.html" class="control-btn admin-btn">
-                        <i class="fas fa-cog"></i> Admin
-                    </a>
+                    <p class="current-user"><i class="fas fa-user"></i> \${currentUser}</p>
+                    <p class="playlist-info">Video \${currentVideoIndex + 1} dari \${selectedVideos.length}</p>
                 </div>
                 <div class="watch-time-info">
-                    <p><i class="fas fa-clock"></i> Waktu menonton: <span id="watchTime">0:00</span> / ${settings.timeLimit}:00</p>
+                    <p><i class="fas fa-clock"></i> Waktu menonton: <span id="watchTime">0:00</span> / \${settings.timeLimit}:00</p>
                     <div class="progress-bar">
                         <div id="progressBar" class="progress-fill"></div>
                     </div>
                 </div>
             </div>
         </div>
-    `;
+    \`;
     
     // Initialize YouTube Player
     player = new YT.Player('player', {
@@ -238,7 +248,7 @@ function loadVideo(index) {
         videoId: video.id,
         playerVars: {
             'autoplay': 1,
-            'controls': 0,  // Disable ALL YouTube controls
+            'controls': 0,
             'disablekb': 1,
             'fs': 0,
             'modestbranding': 1,
@@ -257,69 +267,18 @@ function loadVideo(index) {
         }
     });
     
-    // Setup navigation buttons
-    document.getElementById('prevBtn')?.addEventListener('click', () => {
-        if (currentVideoIndex > 0) {
-            loadVideo(currentVideoIndex - 1);
-            resetTimer();
+    // Setup custom play button overlay
+    setTimeout(() => {
+        const customBtn = document.getElementById('customPlayButton');
+        if (customBtn) {
+            customBtn.addEventListener('click', () => {
+                if (player) {
+                    player.playVideo();
+                    customBtn.style.display = 'none';
+                }
+            });
         }
-    });
-    
-    document.getElementById('nextBtn')?.addEventListener('click', () => {
-        if (currentVideoIndex < videoList.length - 1) {
-            loadVideo(currentVideoIndex + 1);
-            resetTimer();
-        }
-    });
-    
-    // Setup custom play/pause button
-    document.getElementById('playPauseBtn')?.addEventListener('click', () => {
-        togglePlayPause();
-    });
-    
-    // Setup custom play button overlay (for when video loads)
-    document.getElementById('customPlayButton')?.addEventListener('click', () => {
-        if (player) {
-            player.playVideo();
-            document.getElementById('customPlayButton').style.display = 'none';
-        }
-    });
-    
-    // Click on video to pause/play
-    document.getElementById('player')?.addEventListener('click', (e) => {
-        if (e.target.id === 'player' || e.target.tagName === 'IFRAME') {
-            togglePlayPause();
-        }
-    });
-}
-
-// Toggle play/pause
-function togglePlayPause() {
-    if (!player) return;
-    
-    const state = player.getPlayerState();
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const playPauseText = document.getElementById('playPauseText');
-    const customPlayBtn = document.getElementById('customPlayButton');
-    
-    if (state === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
-        if (playPauseBtn) {
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> <span id="playPauseText">Play</span>';
-        }
-        if (customPlayBtn) {
-            customPlayBtn.style.display = 'flex';
-            customPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
-        }
-    } else {
-        player.playVideo();
-        if (playPauseBtn) {
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> <span id="playPauseText">Pause</span>';
-        }
-        if (customPlayBtn) {
-            customPlayBtn.style.display = 'none';
-        }
-    }
+    }, 100);
 }
 
 // Player ready event
@@ -327,67 +286,31 @@ function onPlayerReady(event) {
     event.target.playVideo();
     startWatchTimer();
     
-    // Hide custom play button when video starts
     const customPlayBtn = document.getElementById('customPlayButton');
     if (customPlayBtn) {
         customPlayBtn.style.display = 'none';
     }
     
-    // Block clicks on YouTube branding/links
     setTimeout(() => {
         blockYouTubeLinks();
     }, 1000);
 }
 
-// Block all YouTube links and branding clicks
+// Block all YouTube links
 function blockYouTubeLinks() {
     const iframe = document.querySelector('#player iframe');
     if (iframe) {
         try {
             const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
             if (iframeDoc) {
-                // Block all clicks on YouTube links
-                const ytLinks = iframeDoc.querySelectorAll('a[href*="youtube.com"], a[href*="youtu.be"], .ytp-youtube-button, .ytp-watermark, .ytp-title-link');
+                const ytLinks = iframeDoc.querySelectorAll('a[href*="youtube.com"], a[href*="youtu.be"]');
                 ytLinks.forEach(link => {
                     link.style.pointerEvents = 'none';
                     link.style.display = 'none';
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }, true);
                 });
             }
         } catch (e) {
-            // Cross-origin restriction, use CSS only
-            console.log('Using CSS-only blocking due to cross-origin restrictions');
-        }
-    }
-    
-    // Add overlay to block clicks on top area
-    const playerWrapper = document.querySelector('.video-player-wrapper');
-    if (playerWrapper && !document.querySelector('.yt-click-blocker')) {
-        const blocker = document.createElement('div');
-        blocker.className = 'yt-click-blocker';
-        blocker.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            z-index: 9999;
-            pointer-events: auto;
-        `;
-        blocker.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }, true);
-        
-        const playerDiv = document.getElementById('player');
-        if (playerDiv) {
-            playerDiv.style.position = 'relative';
-            playerDiv.appendChild(blocker);
+            console.log('Cross-origin restriction');
         }
     }
 }
@@ -395,32 +318,25 @@ function blockYouTubeLinks() {
 // Player state change event
 function onPlayerStateChange(event) {
     const customPlayBtn = document.getElementById('customPlayButton');
-    const playPauseBtn = document.getElementById('playPauseBtn');
     
     if (event.data === YT.PlayerState.PLAYING) {
         if (!watchTimer) {
             startWatchTimer();
         }
-        // Hide play button, show pause
         if (customPlayBtn) customPlayBtn.style.display = 'none';
-        if (playPauseBtn) {
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> <span id="playPauseText">Pause</span>';
-        }
     } else if (event.data === YT.PlayerState.PAUSED) {
         pauseWatchTimer();
-        // Show play button
         if (customPlayBtn) {
             customPlayBtn.style.display = 'flex';
             customPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
         }
-        if (playPauseBtn) {
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> <span id="playPauseText">Play</span>';
-        }
     } else if (event.data === YT.PlayerState.ENDED) {
-        // Auto play next video
-        if (currentVideoIndex < videoList.length - 1) {
+        // Auto play next video in playlist
+        if (currentVideoIndex < selectedVideos.length - 1) {
             loadVideo(currentVideoIndex + 1);
-            resetTimer();
+        } else {
+            // All videos finished
+            endWatchingSession('Semua video dalam playlist telah selesai diputar!');
         }
     }
 }
@@ -433,19 +349,14 @@ function startWatchTimer() {
         watchedTime++;
         updateWatchTimeDisplay();
         
-        const timeLimit = settings.timeLimit * 60; // Convert to seconds
+        const timeLimit = settings.timeLimit * 60;
         const warningTime = settings.warningTime * 60;
         
-        // Show warning before time limit
-        if (!warningShown && watchedTime >= (timeLimit - warningTime)) {
-            showWarning();
-            warningShown = true;
-        }
-        
-        // Time limit reached
+        // Check if time limit reached
         if (watchedTime >= timeLimit) {
-            pauseVideo();
-            showPasswordPrompt();
+            endWatchingSession('Waktu menonton telah habis!');
+        } else if (watchedTime >= timeLimit - warningTime && !warningShown) {
+            showTimeWarning();
         }
     }, 1000);
 }
@@ -458,150 +369,208 @@ function pauseWatchTimer() {
     }
 }
 
-// Reset timer
-function resetTimer() {
-    pauseWatchTimer();
-    watchedTime = 0;
-    warningShown = false;
-    updateWatchTimeDisplay();
-}
-
 // Update watch time display
 function updateWatchTimeDisplay() {
-    const timeElement = document.getElementById('watchTime');
-    const progressBar = document.getElementById('progressBar');
-    
-    if (timeElement) {
+    const watchTimeSpan = document.getElementById('watchTime');
+    if (watchTimeSpan) {
         const minutes = Math.floor(watchedTime / 60);
         const seconds = watchedTime % 60;
-        timeElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        watchTimeSpan.textContent = \`\${minutes}:\${seconds.toString().padStart(2, '0')}\`;
     }
     
+    // Update progress bar
+    const progressBar = document.getElementById('progressBar');
     if (progressBar) {
         const timeLimit = settings.timeLimit * 60;
-        const percentage = Math.min((watchedTime / timeLimit) * 100, 100);
-        progressBar.style.width = percentage + '%';
+        const percentage = (watchedTime / timeLimit) * 100;
+        progressBar.style.width = \`\${percentage}%\`;
         
-        // Change color when approaching limit
-        if (percentage >= 80) {
-            progressBar.style.background = '#ff3d00';
-        } else if (percentage >= 60) {
-            progressBar.style.background = '#ff9800';
+        // Change color based on time
+        if (percentage > 80) {
+            progressBar.style.background = '#ff0000';
+        } else if (percentage > 60) {
+            progressBar.style.background = '#ff6600';
         } else {
-            progressBar.style.background = '#4caf50';
+            progressBar.style.background = '#00ff00';
         }
     }
 }
 
-// Pause video
-function pauseVideo() {
-    if (player) {
-        player.pauseVideo();
+// Show time warning
+function showTimeWarning() {
+    warningShown = true;
+    const remainingMinutes = settings.warningTime;
+    
+    // Simple alert (you can customize this)
+    if (confirm(\`⏰ Perhatian!\n\nWaktu menonton tinggal \${remainingMinutes} menit lagi.\nSiapkan diri untuk selesai ya!\`)) {
+        // Continue watching
     }
+}
+
+// End watching session
+function endWatchingSession(message) {
+    // Stop timer
     pauseWatchTimer();
-}
-
-// Resume video
-function resumeVideo() {
+    
+    // Stop player
     if (player) {
-        player.playVideo();
+        player.stopVideo();
     }
-    startWatchTimer();
-}
-
-// Show warning modal
-function showWarning() {
-    warningModal.innerHTML = `
-        <div class="modal-content">
-            <div class="warning-icon">⚠️</div>
-            <h2>Peringatan Waktu!</h2>
-            <p>Waktu menonton akan segera habis dalam ${settings.warningTime} menit.</p>
-            <button onclick="closeWarning()" class="btn-close-warning">OK, Mengerti</button>
-        </div>
-    `;
-    warningModal.classList.add('active');
-    warningModal.style.display = 'flex';
-}
-
-// Close warning
-window.closeWarning = function() {
-    warningModal.classList.remove('active');
-    warningModal.style.display = 'none';
-}
-
-// Show password prompt
-function showPasswordPrompt() {
-    passwordPrompt.innerHTML = `
-        <div class="modal-content">
-            <div class="warning-icon">🔒</div>
-            <h2>Waktu Habis!</h2>
-            <p>Masukkan password untuk melanjutkan menonton</p>
-            <input type="password" id="passwordInput" placeholder="Password Admin">
-            <div class="password-actions">
-                <button onclick="checkPassword()" class="btn-submit-password">Submit</button>
-                <button onclick="closePasswordPrompt()" class="btn-cancel">Kembali ke Admin</button>
-            </div>
-        </div>
-    `;
-    passwordPrompt.classList.add('active');
-    passwordPrompt.style.display = 'flex';
     
-    // Focus on password input
-    setTimeout(() => {
-        document.getElementById('passwordInput')?.focus();
-    }, 100);
+    // Lock session
+    sessionActive = false;
+    document.body.classList.add('session-locked');
     
-    // Handle Enter key
-    document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            checkPassword();
-        }
-    });
+    // Show end modal
+    document.getElementById('end-message').textContent = message;
+    endSessionModal.classList.add('active');
+    
+    // Clear password input
+    unlockPasswordInput.value = '';
+    unlockError.textContent = '';
 }
 
-// Check password
-window.checkPassword = function() {
-    const input = document.getElementById('passwordInput');
-    const password = input?.value || '';
+// Unlock session
+function unlockSession() {
+    const password = unlockPasswordInput.value;
     
     if (password === settings.password) {
-        // Reset timer and resume
+        // Correct password - reset session
+        endSessionModal.classList.remove('active');
+        document.body.classList.remove('session-locked');
+        
+        // Reset data
+        selectedVideos = [];
+        currentUser = null;
         watchedTime = 0;
         warningShown = false;
-        closePasswordPrompt();
-        resumeVideo();
-        updateWatchTimeDisplay();
+        currentVideoIndex = 0;
+        
+        // Show login popup again
+        usernameInput.value = '';
+        const allCards = document.querySelectorAll('.video-card-select');
+        allCards.forEach(card => card.classList.remove('selected', 'disabled'));
+        updateSelectedCount();
+        
+        showLoginPopup();
     } else {
-        alert('Password salah! Silakan coba lagi.');
-        input.value = '';
-        input.focus();
+        // Wrong password
+        unlockError.textContent = '❌ Password salah! Coba lagi.';
+        unlockPasswordInput.value = '';
+        unlockPasswordInput.focus();
     }
 }
 
-// Close password prompt
-window.closePasswordPrompt = function() {
-    passwordPrompt.classList.remove('active');
-    passwordPrompt.style.display = 'none';
-    window.location.href = 'admin.html';
+// Mouse lock functions
+function enableMouseLock() {
+    mouseLocked = true;
+    document.body.style.cursor = 'not-allowed';
+    document.body.classList.add('mouse-locked');
+    
+    showLockIndicator();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'mouse-lock-overlay';
+    overlay.style.cssText = \`
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: 999999;
+        cursor: not-allowed;
+        pointer-events: all;
+    \`;
+    
+    overlay.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, true);
+    
+    overlay.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, true);
+    
+    document.body.appendChild(overlay);
 }
 
-// Show empty state
-function showEmptyState() {
-    videoContainer.innerHTML = `
-        <div class="empty-player-state">
-            <i class="fas fa-video-slash"></i>
-            <h2>Tidak Ada Video</h2>
-            <p>Silakan tambahkan video dari halaman admin terlebih dahulu.</p>
-            <a href="admin.html" class="btn-goto-admin">
-                <i class="fas fa-cog"></i> Ke Halaman Admin
-            </a>
-        </div>
-    `;
+function disableMouseLock() {
+    mouseLocked = false;
+    document.body.style.cursor = '';
+    document.body.classList.remove('mouse-locked');
+    
+    const overlay = document.getElementById('mouse-lock-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+    
+    showUnlockNotification();
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializePlayer);
-} else {
-    initializePlayer();
+function showLockIndicator() {
+    const existingIndicator = document.getElementById('lock-indicator');
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+    
+    const indicator = document.createElement('div');
+    indicator.id = 'lock-indicator';
+    indicator.innerHTML = '🔒';
+    indicator.style.cssText = \`
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 0, 0, 0.9);
+        color: white;
+        padding: 12px 15px;
+        border-radius: 50%;
+        font-size: 24px;
+        z-index: 1000000;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.4);
+        cursor: not-allowed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        animation: blink 2s ease-in-out infinite;
+    \`;
+    document.body.appendChild(indicator);
+    
+    if (!document.getElementById('blink-animation')) {
+        const style = document.createElement('style');
+        style.id = 'blink-animation';
+        style.innerHTML = \`
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
+        \`;
+        document.head.appendChild(style);
+    }
+}
+
+function showUnlockNotification() {
+    const lockIndicator = document.getElementById('lock-indicator');
+    if (lockIndicator) {
+        lockIndicator.remove();
+    }
+}
+
+function setupMouseUnlockListener() {
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'F2') {
+            e.preventDefault();
+            
+            if (mouseLocked) {
+                disableMouseLock();
+            } else {
+                enableMouseLock();
+            }
+        }
+    });
 }
