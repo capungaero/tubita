@@ -64,6 +64,10 @@ function showLoginPopup() {
 
 // Load available videos for selection
 function loadAvailableVideos() {
+    console.log('loadAvailableVideos called');
+    console.log('videoList:', videoList);
+    console.log('videoList.length:', videoList.length);
+    
     if (videoList.length === 0) {
         videoSelectionGrid.innerHTML = '<p style="text-align:center; padding: 20px;">Tidak ada video. Silakan tambahkan video di Admin Panel.</p>';
         return;
@@ -72,18 +76,19 @@ function loadAvailableVideos() {
     videoSelectionGrid.innerHTML = '';
     
     videoList.forEach((video, index) => {
+        console.log('Creating card for video:', video);
         const videoCard = document.createElement('div');
         videoCard.className = 'video-card-select';
         videoCard.dataset.index = index;
         videoCard.dataset.videoId = video.id;
         
-        videoCard.innerHTML = \`
-            <img src="\${video.thumbnail}" alt="\${video.title}" class="video-thumbnail">
+        videoCard.innerHTML = `
+            <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
             <div class="video-info">
-                <div class="video-title">\${video.title}</div>
+                <div class="video-title">${video.title}</div>
             </div>
             <div class="check-mark"><i class="fas fa-check"></i></div>
-        \`;
+        `;
         
         videoCard.addEventListener('click', () => toggleVideoSelection(videoCard, video));
         videoSelectionGrid.appendChild(videoCard);
@@ -102,7 +107,7 @@ function toggleVideoSelection(card, video) {
     } else {
         // Check if max limit reached
         if (selectedVideos.length >= maxVideos) {
-            alert(\`Maksimal hanya \${maxVideos} video yang bisa dipilih!\`);
+            alert(`Maksimal hanya \${maxVideos} video yang bisa dipilih!`);
             return;
         }
         
@@ -217,7 +222,7 @@ function loadVideo(index) {
     const video = selectedVideos[currentVideoIndex];
     
     // Create player container
-    videoContainer.innerHTML = \`
+    videoContainer.innerHTML = `
         <div class="video-player-wrapper">
             <div id="player" class="youtube-player-container">
                 <div id="customPlayButton" class="custom-play-button">
@@ -225,21 +230,21 @@ function loadVideo(index) {
                 </div>
             </div>
             <div class="video-details">
-                <h2>\${video.title}</h2>
-                \${video.channelTitle ? \`<p class="channel-name"><i class="fas fa-user-circle"></i> \${video.channelTitle}</p>\` : ''}
+                <h2>${video.title}</h2>
+                ${video.channelTitle ? `<p class="channel-name"><i class="fas fa-user-circle"></i> ${video.channelTitle}</p>` : ''}
                 <div class="video-controls">
-                    <p class="current-user"><i class="fas fa-user"></i> \${currentUser}</p>
-                    <p class="playlist-info">Video \${currentVideoIndex + 1} dari \${selectedVideos.length}</p>
+                    <p class="current-user"><i class="fas fa-user"></i> ${currentUser}</p>
+                    <p class="playlist-info">Video ${currentVideoIndex + 1} dari ${selectedVideos.length}</p>
                 </div>
                 <div class="watch-time-info">
-                    <p><i class="fas fa-clock"></i> Waktu menonton: <span id="watchTime">0:00</span> / \${settings.timeLimit}:00</p>
+                    <p><i class="fas fa-clock"></i> Waktu menonton: <span id="watchTime">0:00</span> / ${settings.timeLimit}:00</p>
                     <div class="progress-bar">
                         <div id="progressBar" class="progress-fill"></div>
                     </div>
                 </div>
             </div>
         </div>
-    \`;
+    `;
     
     // Initialize YouTube Player
     player = new YT.Player('player', {
@@ -375,7 +380,7 @@ function updateWatchTimeDisplay() {
     if (watchTimeSpan) {
         const minutes = Math.floor(watchedTime / 60);
         const seconds = watchedTime % 60;
-        watchTimeSpan.textContent = \`\${minutes}:\${seconds.toString().padStart(2, '0')}\`;
+        watchTimeSpan.textContent = `\${minutes}:\${seconds.toString().padStart(2, '0')}`;
     }
     
     // Update progress bar
@@ -383,7 +388,7 @@ function updateWatchTimeDisplay() {
     if (progressBar) {
         const timeLimit = settings.timeLimit * 60;
         const percentage = (watchedTime / timeLimit) * 100;
-        progressBar.style.width = \`\${percentage}%\`;
+        progressBar.style.width = `\${percentage}%`;
         
         // Change color based on time
         if (percentage > 80) {
@@ -402,7 +407,7 @@ function showTimeWarning() {
     const remainingMinutes = settings.warningTime;
     
     // Simple alert (you can customize this)
-    if (confirm(\`⏰ Perhatian!\n\nWaktu menonton tinggal \${remainingMinutes} menit lagi.\nSiapkan diri untuk selesai ya!\`)) {
+    if (confirm(`⏰ Perhatian!\n\nWaktu menonton tinggal \${remainingMinutes} menit lagi.\nSiapkan diri untuk selesai ya!`)) {
         // Continue watching
     }
 }
@@ -471,7 +476,7 @@ function enableMouseLock() {
     
     const overlay = document.createElement('div');
     overlay.id = 'mouse-lock-overlay';
-    overlay.style.cssText = \`
+    overlay.style.cssText = `
         position: fixed;
         top: 0;
         left: 0;
@@ -481,7 +486,7 @@ function enableMouseLock() {
         z-index: 999999;
         cursor: not-allowed;
         pointer-events: all;
-    \`;
+    `;
     
     overlay.addEventListener('click', (e) => {
         e.preventDefault();
@@ -520,7 +525,7 @@ function showLockIndicator() {
     const indicator = document.createElement('div');
     indicator.id = 'lock-indicator';
     indicator.innerHTML = '🔒';
-    indicator.style.cssText = \`
+    indicator.style.cssText = `
         position: fixed;
         top: 15px;
         right: 15px;
@@ -538,18 +543,18 @@ function showLockIndicator() {
         width: 50px;
         height: 50px;
         animation: blink 2s ease-in-out infinite;
-    \`;
+    `;
     document.body.appendChild(indicator);
     
     if (!document.getElementById('blink-animation')) {
         const style = document.createElement('style');
         style.id = 'blink-animation';
-        style.innerHTML = \`
+        style.innerHTML = `
             @keyframes blink {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.6; }
             }
-        \`;
+        `;
         document.head.appendChild(style);
     }
 }
