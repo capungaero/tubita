@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tubita - Safe YouTube Player for Kids</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎥 Tubita - YouTube Aman untuk Anak</h1>
+            <div class="header-info">
+                <span id="timeDisplay">Waktu tersisa: --:--</span>
+                <button id="adminBtn" class="admin-btn">⚙️ Admin</button>
+            </div>
+        </header>
+
+        <main id="playerSection">
+            <div id="videoContainer">
+                <div id="player"></div>
+            </div>
+            
+            <div class="controls">
+                <button id="prevBtn" class="control-btn">⏮️ Video Sebelumnya</button>
+                <button id="playPauseBtn" class="control-btn">⏸️ Pause</button>
+                <button id="nextBtn" class="control-btn">⏭️ Video Berikutnya</button>
+            </div>
+
+            <div id="playlist">
+                <h3>Daftar Video</h3>
+                <ul id="playlistItems"></ul>
+            </div>
+
+            <div id="noVideos" class="no-videos" style="display: none;">
+                <p>Belum ada video yang tersedia.</p>
+                <p>Silakan hubungi admin untuk menambahkan video.</p>
+            </div>
+        </main>
+
+        <div id="adminSection" style="display: none;">
+            <div class="admin-panel">
+                <h2>Panel Admin</h2>
+                
+                <div class="admin-form">
+                    <h3>Pengaturan Waktu</h3>
+                    <label>
+                        Batas Waktu Menonton (menit):
+                        <input type="number" id="timeLimitInput" min="1" value="30">
+                    </label>
+                    <button id="saveTimeLimit" class="btn">Simpan Batas Waktu</button>
+                </div>
+
+                <div class="admin-form">
+                    <h3>Password Admin</h3>
+                    <label>
+                        Password Saat Ini:
+                        <input type="password" id="currentPassword" placeholder="Masukkan password">
+                    </label>
+                    <label>
+                        Password Baru:
+                        <input type="password" id="newPassword" placeholder="Password baru">
+                    </label>
+                    <button id="changePassword" class="btn">Ubah Password</button>
+                </div>
+
+                <div class="admin-form">
+                    <h3>Kelola Video</h3>
+                    <label>
+                        YouTube Video ID:
+                        <input type="text" id="videoIdInput" placeholder="contoh: dQw4w9WgXcQ">
+                        <small>ID video dari URL: youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong></small>
+                    </label>
+                    <label>
+                        Judul Video:
+                        <input type="text" id="videoTitleInput" placeholder="Judul video">
+                    </label>
+                    <button id="addVideo" class="btn">Tambah Video</button>
+                </div>
+
+                <div class="admin-form">
+                    <h3>Daftar Video Tersimpan</h3>
+                    <ul id="adminVideoList"></ul>
+                </div>
+
+                <button id="closeAdmin" class="btn btn-secondary">Tutup Admin Panel</button>
+            </div>
+        </div>
+
+        <div id="timeWarningModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>⚠️ Waktu Menonton Habis!</h2>
+                <p>Batas waktu menonton telah tercapai.</p>
+                <p>Masukkan password admin untuk melanjutkan menonton.</p>
+                <input type="password" id="continuePassword" placeholder="Password admin">
+                <div class="modal-buttons">
+                    <button id="continueWatching" class="btn">Lanjut Menonton</button>
+                    <button id="stopWatching" class="btn btn-secondary">Berhenti</button>
+                </div>
+                <p id="passwordError" class="error-message" style="display: none;">Password salah!</p>
+            </div>
+        </div>
+
+        <div id="adminLoginModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>🔐 Login Admin</h2>
+                <p>Masukkan password admin untuk mengakses panel admin.</p>
+                <input type="password" id="adminLoginPassword" placeholder="Password admin">
+                <div class="modal-buttons">
+                    <button id="adminLogin" class="btn">Login</button>
+                    <button id="cancelAdminLogin" class="btn btn-secondary">Batal</button>
+                </div>
+                <p id="adminLoginError" class="error-message" style="display: none;">Password salah!</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
