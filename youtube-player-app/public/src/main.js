@@ -44,10 +44,10 @@ function enableMouseLock() {
     document.body.style.cursor = 'not-allowed';
     document.body.classList.add('mouse-locked');
     
-    // Show lock indicator
+    // Show lock indicator (top right only)
     showLockIndicator();
     
-    // Block all pointer events
+    // Create invisible overlay to block all clicks
     const overlay = document.createElement('div');
     overlay.id = 'mouse-lock-overlay';
     overlay.style.cssText = `
@@ -59,35 +59,7 @@ function enableMouseLock() {
         background: transparent;
         z-index: 999999;
         cursor: not-allowed;
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
-        padding-top: 60px;
         pointer-events: all;
-    `;
-    overlay.innerHTML = `
-        <div style="
-            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
-            color: white;
-            padding: 25px 45px;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-            border: 3px solid rgba(255,255,255,0.3);
-            animation: pulse 2s infinite;
-        ">
-            <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
-            <div style="margin-bottom: 5px;">MOUSE TERKUNCI</div>
-            <div style="font-size: 14px; font-weight: normal; margin-top: 10px; opacity: 0.9;">
-                🎬 Tonton video sampai selesai!<br>
-                Video akan otomatis berjalan.
-            </div>
-            <div style="font-size: 12px; font-weight: normal; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); opacity: 0.8;">
-                👨‍👩‍👧 Orang tua: Tekan <kbd style="background: white; color: red; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-family: monospace;">Ctrl + F2</kbd> untuk unlock
-            </div>
-        </div>
     `;
     
     // Prevent all clicks
@@ -104,19 +76,6 @@ function enableMouseLock() {
     }, true);
     
     document.body.appendChild(overlay);
-    
-    // Add pulse animation
-    if (!document.getElementById('pulse-animation')) {
-        const style = document.createElement('style');
-        style.id = 'pulse-animation';
-        style.innerHTML = `
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.02); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
 }
 
 // Disable mouse lock
@@ -137,56 +96,57 @@ function disableMouseLock() {
 
 // Show lock indicator
 function showLockIndicator() {
+    // Remove existing indicator if any
+    const existingIndicator = document.getElementById('lock-indicator');
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+    
     const indicator = document.createElement('div');
     indicator.id = 'lock-indicator';
-    indicator.innerHTML = '🔒 Mouse Locked';
+    indicator.innerHTML = '🔒';
     indicator.style.cssText = `
         position: fixed;
-        top: 10px;
-        right: 10px;
+        top: 15px;
+        right: 15px;
         background: rgba(255, 0, 0, 0.9);
         color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-size: 14px;
-        font-weight: bold;
+        padding: 12px 15px;
+        border-radius: 50%;
+        font-size: 24px;
         z-index: 1000000;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 3px 15px rgba(0,0,0,0.4);
+        cursor: not-allowed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        animation: blink 2s ease-in-out infinite;
     `;
     document.body.appendChild(indicator);
+    
+    // Add blink animation if not exists
+    if (!document.getElementById('blink-animation')) {
+        const style = document.createElement('style');
+        style.id = 'blink-animation';
+        style.innerHTML = `
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
-// Show unlock notification
+// Show unlock notification (simplified)
 function showUnlockNotification() {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0, 255, 0, 0.95);
-        color: white;
-        padding: 30px 50px;
-        border-radius: 10px;
-        font-size: 24px;
-        font-weight: bold;
-        z-index: 1000001;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-        text-align: center;
-    `;
-    notification.innerHTML = '✅ MOUSE UNLOCKED!<br><span style="font-size: 16px;">Kontrol aktif</span>';
-    document.body.appendChild(notification);
-    
-    // Remove lock indicator
+    // Just remove lock indicator
     const lockIndicator = document.getElementById('lock-indicator');
     if (lockIndicator) {
         lockIndicator.remove();
     }
-    
-    // Remove notification after 2 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 2000);
 }
 
 // Setup keyboard listener for Ctrl+F2
