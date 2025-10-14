@@ -419,11 +419,19 @@ function saveSettings() {
 }
 
 function loadSettings() {
-    const saved = localStorage.getItem('tubita-settings');
-    if (saved) {
-        const settings = JSON.parse(saved);
-        videoList = settings.videoList || [];
-        timeLimit = settings.timeLimit || 30;
-        adminPassword = settings.adminPassword || 'admin123';
+    try {
+        const saved = localStorage.getItem('tubita-settings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            videoList = settings.videoList || [];
+            timeLimit = settings.timeLimit || 30;
+            adminPassword = settings.adminPassword || 'admin123';
+        }
+    } catch (error) {
+        console.error('Error loading settings from localStorage:', error);
+        // Reset to defaults if corrupted
+        videoList = [];
+        timeLimit = 30;
+        adminPassword = 'admin123';
     }
 }
