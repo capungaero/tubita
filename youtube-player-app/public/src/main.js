@@ -62,11 +62,18 @@ function loadVideo(index) {
     // Create player container
     videoContainer.innerHTML = `
         <div class="video-player-wrapper">
-            <div id="player"></div>
+            <div id="player" class="youtube-player-container">
+                <div id="customPlayButton" class="custom-play-button">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
             <div class="video-details">
                 <h2>${video.title}</h2>
                 ${video.channelTitle ? `<p class="channel-name"><i class="fas fa-user-circle"></i> ${video.channelTitle}</p>` : ''}
                 <div class="video-controls">
+                    <button id="playPauseBtn" class="control-btn">
+                        <i class="fas fa-pause"></i> <span id="playPauseText">Pause</span>
+                    </button>
                     <button id="prevBtn" class="control-btn" ${currentVideoIndex === 0 ? 'disabled' : ''}>
                         <i class="fas fa-step-backward"></i> Previous
                     </button>
@@ -94,7 +101,7 @@ function loadVideo(index) {
         videoId: video.id,
         playerVars: {
             'autoplay': 1,
-            'controls': 1,
+            'controls': 0,  // Disable ALL YouTube controls
             'disablekb': 1,
             'fs': 0,
             'modestbranding': 1,
@@ -127,12 +134,67 @@ function loadVideo(index) {
             resetTimer();
         }
     });
+    
+    // Setup custom play/pause button
+    document.getElementById('playPauseBtn')?.addEventListener('click', () => {
+        togglePlayPause();
+    });
+    
+    // Setup custom play button overlay (for when video loads)
+    document.getElementById('customPlayButton')?.addEventListener('click', () => {
+        if (player) {
+            player.playVideo();
+            document.getElementById('customPlayButton').style.display = 'none';
+        }
+    });
+    
+    // Click on video to pause/play
+    document.getElementById('player')?.addEventListener('click', (e) => {
+        if (e.target.id === 'player' || e.target.tagName === 'IFRAME') {
+            togglePlayPause();
+        }
+    });
+}
+
+// Toggle play/pause
+function togglePlayPause() {
+    if (!player) return;
+    
+    const state = player.getPlayerState();
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playPauseText = document.getElementById('playPauseText');
+    const customPlayBtn = document.getElementById('customPlayButton');
+    
+    if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+        if (playPauseBtn) {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> <span id="playPauseText">Play</span>';
+        }
+        if (customPlayBtn) {
+            customPlayBtn.style.display = 'flex';
+            customPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    } else {
+        player.playVideo();
+        if (playPauseBtn) {
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> <span id="playPauseText">Pause</span>';
+        }
+        if (customPlayBtn) {
+            customPlayBtn.style.display = 'none';
+        }
+    }
 }
 
 // Player ready event
 function onPlayerReady(event) {
     event.target.playVideo();
     startWatchTimer();
+    
+    // Hide custom play button when video starts
+    const customPlayBtn = document.getElementById('customPlayButton');
+    if (customPlayBtn) {
+        customPlayBtn.style.display = 'none';
+    }
     
     // Block clicks on YouTube branding/links
     setTimeout(() => {
@@ -195,12 +257,28 @@ function blockYouTubeLinks() {
 
 // Player state change event
 function onPlayerStateChange(event) {
+    const customPlayBtn = document.getElementById('customPlayButton');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    
     if (event.data === YT.PlayerState.PLAYING) {
         if (!watchTimer) {
             startWatchTimer();
         }
+        // Hide play button, show pause
+        if (customPlayBtn) customPlayBtn.style.display = 'none';
+        if (playPauseBtn) {
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> <span id="playPauseText">Pause</span>';
+        }
     } else if (event.data === YT.PlayerState.PAUSED) {
         pauseWatchTimer();
+        // Show play button
+        if (customPlayBtn) {
+            customPlayBtn.style.display = 'flex';
+            customPlayBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+        if (playPauseBtn) {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> <span id="playPauseText">Play</span>';
+        }
     } else if (event.data === YT.PlayerState.ENDED) {
         // Auto play next video
         if (currentVideoIndex < videoList.length - 1) {

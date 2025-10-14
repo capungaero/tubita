@@ -67,19 +67,59 @@ body {
     position: relative;
 }
 
+/* Custom Play Button Overlay */
+.custom-play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 0, 0, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.custom-play-button:hover {
+    background: rgba(255, 0, 0, 1);
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+}
+
+.custom-play-button i {
+    color: white;
+    font-size: 32px;
+    margin-left: 5px; /* Adjust for visual centering of play icon */
+}
+
+.youtube-player-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+}
+
 /* Hide YouTube branding and unwanted elements */
 #player iframe {
     pointer-events: auto;
 }
 
-/* Hide YouTube logo and "Watch on YouTube" button - Multiple selectors for safety */
-.ytp-title,
+/* HIDE ALL YOUTUBE CONTROLS - Only show center play button */
+.ytp-chrome-bottom,
 .ytp-chrome-top,
+.ytp-gradient-bottom,
+.ytp-gradient-top,
+.ytp-progress-bar-container,
+.ytp-title,
 .ytp-show-cards-title,
 .ytp-watermark,
 .ytp-youtube-button,
 .ytp-pause-overlay,
-.ytp-watermark,
 .branding-img,
 .ytp-chrome-top-buttons,
 a[class*="ytp"],
@@ -87,21 +127,36 @@ a[class*="ytp"],
 .ytp-title-channel,
 .ytp-title-text,
 .ytp-title-link,
-.ytp-show-cards-title,
 .ytp-ce-element,
 .ytp-cards-button,
 .ytp-cards-teaser,
 .iv-branding,
-.ytp-pause-overlay-container {
+.ytp-pause-overlay-container,
+.ytp-settings-button,
+.ytp-miniplayer-button,
+.ytp-size-button,
+.ytp-fullscreen-button,
+.ytp-subtitles-button,
+.ytp-volume-panel,
+.ytp-time-display,
+.ytp-play-button,
+.ytp-next-button,
+.ytp-endscreen-content,
+.ytp-share-button,
+.ytp-overflow-button {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
 }
 
-/* Keep controls but hide branding */
-.ytp-gradient-top {
-    display: none !important;
+/* ONLY ALLOW center play/pause button */
+.ytp-cued-thumbnail-overlay,
+.ytp-large-play-button {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 /* Additional blocking for any YouTube links */
