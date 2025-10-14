@@ -103,7 +103,9 @@ function loadVideo(index) {
             'iv_load_policy': 3,
             'cc_load_policy': 0,
             'enablejsapi': 1,
-            'origin': window.location.origin
+            'origin': window.location.origin,
+            'playsinline': 1,
+            'widget_referrer': window.location.origin
         },
         events: {
             'onReady': onPlayerReady,
@@ -131,6 +133,64 @@ function loadVideo(index) {
 function onPlayerReady(event) {
     event.target.playVideo();
     startWatchTimer();
+    
+    // Block clicks on YouTube branding/links
+    setTimeout(() => {
+        blockYouTubeLinks();
+    }, 1000);
+}
+
+// Block all YouTube links and branding clicks
+function blockYouTubeLinks() {
+    const iframe = document.querySelector('#player iframe');
+    if (iframe) {
+        try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (iframeDoc) {
+                // Block all clicks on YouTube links
+                const ytLinks = iframeDoc.querySelectorAll('a[href*="youtube.com"], a[href*="youtu.be"], .ytp-youtube-button, .ytp-watermark, .ytp-title-link');
+                ytLinks.forEach(link => {
+                    link.style.pointerEvents = 'none';
+                    link.style.display = 'none';
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }, true);
+                });
+            }
+        } catch (e) {
+            // Cross-origin restriction, use CSS only
+            console.log('Using CSS-only blocking due to cross-origin restrictions');
+        }
+    }
+    
+    // Add overlay to block clicks on top area
+    const playerWrapper = document.querySelector('.video-player-wrapper');
+    if (playerWrapper && !document.querySelector('.yt-click-blocker')) {
+        const blocker = document.createElement('div');
+        blocker.className = 'yt-click-blocker';
+        blocker.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            z-index: 9999;
+            pointer-events: auto;
+        `;
+        blocker.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+        
+        const playerDiv = document.getElementById('player');
+        if (playerDiv) {
+            playerDiv.style.position = 'relative';
+            playerDiv.appendChild(blocker);
+        }
+    }
 }
 
 // Player state change event
