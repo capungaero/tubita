@@ -64,6 +64,28 @@ body {
     width: 100%;
     aspect-ratio: 16/9;
     background: #000;
+    position: relative;
+}
+
+/* Hide YouTube branding and unwanted elements */
+#player iframe {
+    pointer-events: auto;
+}
+
+/* Hide YouTube logo and "Watch on YouTube" button */
+.ytp-title,
+.ytp-chrome-top,
+.ytp-show-cards-title,
+.ytp-watermark,
+.ytp-youtube-button {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Keep controls but hide branding */
+.ytp-gradient-top {
+    display: none !important;
 }
 
 .video-details {
