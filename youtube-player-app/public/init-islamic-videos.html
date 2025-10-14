@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Islamic Kids Videos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .status {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕌 Initialize Islamic Kids Videos 🌙</h1>
+        <p>Klik tombol di bawah untuk mengisi database dengan 100 video tontonan anak muslim edukatif.</p>
+        
+        <button onclick="initializeVideos()">📺 Initialize 100 Videos</button>
+        <button onclick="clearVideos()" style="background: #e74c3c;">🗑️ Clear All Videos</button>
+        <button onclick="viewVideos()">👁️ View Current Videos</button>
+        
+        <div class="status" id="status">Ready to initialize...</div>
+    </div>
+
+    <script>
+        const islamicKidsVideos = [
+            // Surat-surat Pendek Al-Quran
+            { id: 'fe5zIUNsEHY', title: '🕌 Belajar Surat Al-Fatihah untuk Anak' },
+            { id: '_H4lbqGLZYI', title: '🌙 Surat Al-Ikhlas - Animasi Anak Muslim' },
+            { id: 'rK-N9gNTMKk', title: '⭐ Surat An-Nas - Lagu Anak Islami' },
+            { id: 'W9xRyaWk6Qs', title: '✨ Surat Al-Falaq - Merdu untuk Anak' },
+            { id: 'h3KTb_FWgbw', title: '🎵 Surat Al-Kafirun - Mudah Dihafal' },
+            
+            // Doa-doa Harian
+            { id: 'XoFz-P_PWZI', title: '🤲 Doa Sehari-hari Anak Muslim' },
+            { id: 'kx3zsoOFNxY', title: '🌅 Doa Bangun Tidur - Animasi Lucu' },
+            { id: 'Nl3jKg2LWUA', title: '🍽️ Doa Sebelum Makan - Anak Muslim' },
+            { id: 'rZM3VBu9mz0', title: '😴 Doa Sebelum Tidur - Lagu Pengantar' },
+            { id: '7xFLqEfq3Nc', title: '🚗 Doa Naik Kendaraan - Edukatif' },
+            
+            // Cerita Nabi dan Sahabat
+            { id: 'onM37U_Tdt8', title: '📖 Kisah Nabi Muhammad SAW untuk Anak' },
+            { id: 'x6FuvhSXLJc', title: '🐪 Kisah Nabi Ibrahim AS - Animasi' },
+            { id: 'xwKbtntCELs', title: '🌊 Kisah Nabi Nuh AS - Bahtera Besar' },
+            { id: 'ZaXFrj3PKoI', title: '🐋 Kisah Nabi Yunus AS - Perut Ikan Paus' },
+            { id: 'n-0qfJHwZ8Q', title: '👑 Kisah Nabi Sulaiman AS - Raja Bijaksana' },
+            
+            // Adab dan Akhlak
+            { id: 'cMr1CsSkD4w', title: '🙏 Adab Bertamu dalam Islam' },
+            { id: 'h6KjMAZ3UGI', title: '💚 Berbakti kepada Orang Tua' },
+            { id: 'Vp4WkpqQw0E', title: '🤝 Adab Berteman - Anak Muslim' },
+            { id: 'Q7rCFYgE8j4', title: '😊 Berbicara Sopan dan Santun' },
+            { id: 'pZMtcEOpL2w', title: '🎁 Berbagi dengan Sesama' },
+            
+            // Sholat dan Ibadah
+            { id: 'GYqSGYnNHKQ', title: '🕌 Tata Cara Wudhu untuk Anak' },
+            { id: 'JBJ5b9l3m3M', title: '🙏 Belajar Sholat - Panduan Lengkap' },
+            { id: 'nS1V3JXdXMg', title: '📿 Gerakan Sholat yang Benar' },
+            { id: 'l4E6UGQPyxE', title: '🌙 Adzan - Panggilan Sholat' },
+            { id: 'KiQgDWwBwlg', title: '🤲 Doa Setelah Sholat - Anak Muslim' },
+            
+            // Lagu-lagu Islami Anak
+            { id: 'u1WQ1f8WCqQ', title: '🎵 Asmaul Husna 99 Nama Allah' },
+            { id: '_zMaW8W8qD0', title: '🌟 Tala al Badru Alayna - Nasyid' },
+            { id: 'p0YylMD2Hl0', title: '🎶 Anak Sholeh - Lagu Anak Islami' },
+            { id: 'fNKGRdmGgbA', title: '💫 Bismillah - Lagu Edukatif' },
+            { id: '5TJSQp3xBVs', title: '🌙 Lagu Ramadhan untuk Anak' },
+            
+            // Huruf Hijaiyah
+            { id: 'Q6wj_kmeqlk', title: '📚 Belajar Huruf Hijaiyah A-Z' },
+            { id: 'zTfEuIJdBUE', title: '✏️ Menulis Huruf Hijaiyah - Mudah' },
+            { id: 'b8QdL2GUwBY', title: '🎯 Huruf Hijaiyah dengan Harakat' },
+            { id: 'tYqBCxwxOMU', title: '🌈 Hijaiyah Warna-warni - Fun Learning' },
+            { id: 'S7A5RqPRNXo', title: '🎨 Mewarnai Huruf Hijaiyah' },
+            
+            // Angka Arab
+            { id: 'W8TEw0jTqO8', title: '🔢 Belajar Angka Arab 1-10' },
+            { id: 'nNLjxKaQGWI', title: '📊 Angka Arab 1-100 - Lengkap' },
+            { id: 'rTcPBx0GWCA', title: '🎲 Menghitung dengan Angka Arab' },
+            
+            // Kaligrafi dan Seni Islam
+            { id: 'BPEiJJOaNpw', title: '🖌️ Kaligrafi Bismillah untuk Anak' },
+            { id: 'jYqP2KqJrdk', title: '🎨 Seni Kaligrafi Islam - Tutorial' },
+            
+            // Cerita Islami Moral
+            { id: 'n0qKMwH8IU4', title: '📖 Kisah Abu Nawas - Cerdas dan Lucu' },
+            { id: 'g7oJ5RCKcGU', title: '🌟 Kisah Teladan Anak Sholeh' },
+            { id: 'FKFcrRvpfMI', title: '💎 Kisah Pencuri yang Bertaubat' },
+            { id: 'fzc4v1A2mG8', title: '🐦 Burung yang Selalu Bersyukur' },
+            { id: 'YMOWhP8CcU0', title: '🌻 Kebun Surga - Kisah Motivasi' },
+            
+            // Ramadhan dan Puasa
+            { id: 'TL1fRF1fZlY', title: '🌙 Menyambut Bulan Ramadhan' },
+            { id: 'N8LqGGnXlnY', title: '⭐ Niat Puasa Ramadhan - Anak' },
+            { id: 'LqQi5xQxb3g', title: '🍽️ Doa Berbuka Puasa' },
+            { id: 'OXeNZ7Z7xVg', title: '🌃 Tadarus Al-Quran di Ramadhan' },
+            { id: 'cTUwCYYQmUA', title: '🎁 Berbagi di Bulan Ramadhan' },
+            
+            // Idul Fitri dan Idul Adha
+            { id: 'kJJ3VjEJb0M', title: '🎉 Hari Raya Idul Fitri' },
+            { id: 'u5WhJTlKp7I', title: '🐑 Kisah Idul Adha untuk Anak' },
+            { id: 'p7rCx3RjUJk', title: '🕌 Sholat Ied - Panduan Anak' },
+            { id: 'EqWiPNgzQrA', title: '🎊 Takbiran Idul Fitri' },
+            
+            // Akidah dan Tauhid
+            { id: 'kdQj6Qv2u4M', title: '☝️ Rukun Islam - 5 Pilar Islam' },
+            { id: 'bPFI0TDTKBM', title: '📿 Rukun Iman - 6 Rukun Iman' },
+            { id: 'DphfPQzwLhM', title: '🌟 Iman kepada Allah SWT' },
+            { id: 'Yz1BGFvHPFg', title: '📚 Iman kepada Kitab-kitab Allah' },
+            { id: 'v3hfNAqX93M', title: '👼 Iman kepada Malaikat' },
+            
+            // Sejarah Islam
+            { id: 'VlXOgCx0cB0', title: '🕋 Sejarah Kabah - Rumah Allah' },
+            { id: 'kIh_EzMv4Xo', title: '🕌 Masjid Nabawi di Madinah' },
+            { id: 'GKqhxr0V6jM', title: '🌟 Sejarah Hijrah Nabi' },
+            { id: 'KRNWuGKp5jM', title: '⚔️ Perang Badar - Kisah Heroik' },
+            
+            // Hadits untuk Anak
+            { id: 'bVlPF0_MMSA', title: '📜 Hadits tentang Kebersihan' },
+            { id: 'DnhNzKs3cT8', title: '💚 Hadits tentang Kasih Sayang' },
+            { id: 'vP4AqJhT5UQ', title: '🤝 Hadits tentang Persaudaraan' },
+            { id: 'pQMpaqOdxfc', title: '😊 Hadits tentang Senyum' },
+            
+            // Nama-nama Nabi
+            { id: 'q0APhxMgAhk', title: '👥 25 Nama Nabi dan Rasul' },
+            { id: 'fwOsL3N0_Rc', title: '📖 Kisah Para Nabi - Kompilasi' },
+            
+            // Tata Cara Hidup Islami
+            { id: 'fz2ILl0DKQE', title: '🛏️ Cara Tidur Menurut Sunnah' },
+            { id: 'L7pRjzM7Qgs', title: '🚿 Adab Mandi dalam Islam' },
+            { id: 'WuMQ3VXqTQE', title: '👕 Cara Berpakaian Islami' },
+            { id: 'mQXL4TZXS5A', title: '🍽️ Adab Makan dan Minum' },
+            
+            // Mengenal Allah
+            { id: 'Coh3LuRLqYE', title: '☝️ Allah Maha Pencipta' },
+            { id: 'y-YnYvILDCo', title: '🌍 Kebesaran Ciptaan Allah' },
+            { id: 'TaDsOBJqrwk', title: '💫 Allah Maha Pengasih' },
+            { id: 'xQMwJ5QWNvY', title: '🌟 Allah Maha Mengetahui' },
+            
+            // Zikir dan Tasbih
+            { id: 'IyQQf6xdEVo', title: '📿 Tasbih Subhanallah 33x' },
+            { id: 'GkdPFq-1lf8', title: '🙏 Zikir Alhamdulillah 33x' },
+            { id: '7HNpzSUJtWI', title: '⭐ Takbir Allahu Akbar 33x' },
+            { id: 'WBiPPL2qPj8', title: '🌙 Zikir Pagi dan Petang' },
+            
+            // Keutamaan Ilmu
+            { id: 'tJDgMYvZF3s', title: '📚 Pentingnya Menuntut Ilmu' },
+            { id: 'GD5Z3lxV8YM', title: '✏️ Anak Cerdas, Anak Sholeh' },
+            { id: 'sVUYxNzT1LA', title: '🎓 Belajar adalah Ibadah' },
+            
+            // Sikap Terpuji
+            { id: 'HO1n8xJLxlU', title: '😊 Sifat Jujur dalam Islam' },
+            { id: 'YmQBYHMC5Ok', title: '💪 Sabar dan Syukur' },
+            { id: 'NjfBLbY2L0w', title: '🌟 Rendah Hati dan Tawadhu' },
+            { id: 'kPPBmQ4Zl8Q', title: '💚 Dermawan dan Peduli' },
+            
+            // Larangan dalam Islam
+            { id: 'tLD5iGNc3s8', title: '🚫 Jangan Bohong - Kisah Moral' },
+            { id: 'LLNHiNx1Uyk', title: '❌ Bahaya Berbohong' },
+            { id: 'jXKw3rKL4TI', title: '🛑 Menjauhi Perbuatan Buruk' },
+            
+            // Kebersihan dan Kesehatan
+            { id: '8xQJK_LxJqI', title: '🧼 Mencuci Tangan dengan Benar' },
+            { id: 'bKgDgz8YRVg', title: '🦷 Sikat Gigi Menurut Sunnah' },
+            { id: 'WqJTt8LPYiY', title: '🌿 Kebersihan Sebagian dari Iman' },
+            
+            // Kompilasi dan Mix
+            { id: 'DWHjT3qMHJQ', title: '🎵 Kompilasi Lagu Islami Anak 1 Jam' },
+            { id: 'qJmfQZ7L7nQ', title: '📖 Kumpulan Kisah Nabi Lengkap' },
+            { id: 'V35bJQnX2No', title: '🌙 Murotal Juz Amma untuk Anak' },
+            { id: 'xPh6_t1t5fY', title: '🎶 Sholawat Nabi Merdu untuk Anak' }
+        ];
+
+        async function initializeVideos() {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = '<span class="info">🔄 Initializing videos...</span>\n\n';
+            
+            try {
+                // Tambahkan thumbnail default
+                const videosWithThumbnails = islamicKidsVideos.map(video => ({
+                    ...video,
+                    thumbnail: `https://img.youtube.com/vi/${video.id}/mqdefault.jpg`,
+                    channelTitle: 'Islamic Kids Channel'
+                }));
+                
+                // Save to localStorage
+                localStorage.setItem('videoList', JSON.stringify(videosWithThumbnails));
+                
+                statusEl.innerHTML += `<span class="success">✅ Success!</span>\n\n`;
+                statusEl.innerHTML += `📊 Total videos initialized: ${videosWithThumbnails.length}\n`;
+                statusEl.innerHTML += `💾 Saved to localStorage\n\n`;
+                statusEl.innerHTML += `<span class="info">Silakan buka halaman utama atau admin panel untuk melihat video.</span>\n`;
+                statusEl.innerHTML += `\n🌐 <a href="index.html" style="color: #667eea;">Go to Main Page</a>`;
+                statusEl.innerHTML += ` | <a href="admin.html" style="color: #667eea;">Go to Admin Panel</a>`;
+                
+            } catch (error) {
+                statusEl.innerHTML += `<span style="color: red;">❌ Error: ${error.message}</span>\n`;
+            }
+        }
+        
+        function clearVideos() {
+            if (confirm('⚠️ Apakah Anda yakin ingin menghapus semua video?')) {
+                localStorage.removeItem('videoList');
+                document.getElementById('status').innerHTML = '<span class="success">✅ All videos cleared!</span>';
+            }
+        }
+        
+        function viewVideos() {
+            const videoList = localStorage.getItem('videoList');
+            const statusEl = document.getElementById('status');
+            
+            if (!videoList) {
+                statusEl.innerHTML = '<span style="color: orange;">⚠️ No videos found in localStorage</span>';
+                return;
+            }
+            
+            const videos = JSON.parse(videoList);
+            statusEl.innerHTML = `<span class="success">📺 Found ${videos.length} videos</span>\n\n`;
+            statusEl.innerHTML += videos.slice(0, 10).map((v, i) => 
+                `${i+1}. ${v.title} (${v.id})`
+            ).join('\n');
+            
+            if (videos.length > 10) {
+                statusEl.innerHTML += `\n\n... dan ${videos.length - 10} video lainnya`;
+            }
+        }
+    </script>
+</body>
+</html>
