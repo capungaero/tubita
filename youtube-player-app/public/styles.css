@@ -12,6 +12,26 @@ body {
     margin: 0;
 }
 
+/* Mouse Lock Styles */
+body.mouse-locked {
+    cursor: not-allowed !important;
+    user-select: none !important;
+}
+
+body.mouse-locked * {
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+#mouse-lock-overlay {
+    pointer-events: all !important;
+    cursor: not-allowed !important;
+}
+
+#mouse-lock-overlay * {
+    pointer-events: none !important;
+}
+
 /* Player Page Styles */
 .player-header {
     background: #fff;

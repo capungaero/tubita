@@ -15,10 +15,20 @@ let watchTimer = null;
 let watchedTime = 0;
 let warningShown = false;
 
+// Mouse lock feature
+let mouseLocked = true; // Default locked on page load
+let mouseUnlockKey = 'F2'; // Ctrl+F2 to unlock
+
 // DOM Elements
 const videoContainer = document.getElementById('video-container');
 const warningModal = document.getElementById('warning-modal');
 const passwordPrompt = document.getElementById('password-prompt');
+
+// Initialize mouse lock on page load
+document.addEventListener('DOMContentLoaded', () => {
+    enableMouseLock();
+    setupMouseUnlockListener();
+});
 
 // Initialize YouTube Player API
 function onYouTubeIframeAPIReady() {
@@ -27,6 +37,173 @@ function onYouTubeIframeAPIReady() {
 
 // Make function globally available for YouTube API
 window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+// Enable mouse lock - disable all clicks
+function enableMouseLock() {
+    mouseLocked = true;
+    document.body.style.cursor = 'not-allowed';
+    document.body.classList.add('mouse-locked');
+    
+    // Show lock indicator
+    showLockIndicator();
+    
+    // Block all pointer events
+    const overlay = document.createElement('div');
+    overlay.id = 'mouse-lock-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: 999999;
+        cursor: not-allowed;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 60px;
+        pointer-events: all;
+    `;
+    overlay.innerHTML = `
+        <div style="
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            padding: 25px 45px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 3px solid rgba(255,255,255,0.3);
+            animation: pulse 2s infinite;
+        ">
+            <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
+            <div style="margin-bottom: 5px;">MOUSE TERKUNCI</div>
+            <div style="font-size: 14px; font-weight: normal; margin-top: 10px; opacity: 0.9;">
+                🎬 Tonton video sampai selesai!<br>
+                Video akan otomatis berjalan.
+            </div>
+            <div style="font-size: 12px; font-weight: normal; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); opacity: 0.8;">
+                👨‍👩‍👧 Orang tua: Tekan <kbd style="background: white; color: red; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-family: monospace;">Ctrl + F2</kbd> untuk unlock
+            </div>
+        </div>
+    `;
+    
+    // Prevent all clicks
+    overlay.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, true);
+    
+    overlay.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, true);
+    
+    document.body.appendChild(overlay);
+    
+    // Add pulse animation
+    if (!document.getElementById('pulse-animation')) {
+        const style = document.createElement('style');
+        style.id = 'pulse-animation';
+        style.innerHTML = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.02); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Disable mouse lock
+function disableMouseLock() {
+    mouseLocked = false;
+    document.body.style.cursor = '';
+    document.body.classList.remove('mouse-locked');
+    
+    // Remove overlay
+    const overlay = document.getElementById('mouse-lock-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+    
+    // Show unlock notification
+    showUnlockNotification();
+}
+
+// Show lock indicator
+function showLockIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'lock-indicator';
+    indicator.innerHTML = '🔒 Mouse Locked';
+    indicator.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 0, 0, 0.9);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        z-index: 1000000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    `;
+    document.body.appendChild(indicator);
+}
+
+// Show unlock notification
+function showUnlockNotification() {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 255, 0, 0.95);
+        color: white;
+        padding: 30px 50px;
+        border-radius: 10px;
+        font-size: 24px;
+        font-weight: bold;
+        z-index: 1000001;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        text-align: center;
+    `;
+    notification.innerHTML = '✅ MOUSE UNLOCKED!<br><span style="font-size: 16px;">Kontrol aktif</span>';
+    document.body.appendChild(notification);
+    
+    // Remove lock indicator
+    const lockIndicator = document.getElementById('lock-indicator');
+    if (lockIndicator) {
+        lockIndicator.remove();
+    }
+    
+    // Remove notification after 2 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 2000);
+}
+
+// Setup keyboard listener for Ctrl+F2
+function setupMouseUnlockListener() {
+    document.addEventListener('keydown', (e) => {
+        // Check for Ctrl+F2
+        if (e.ctrlKey && e.key === 'F2') {
+            e.preventDefault();
+            
+            if (mouseLocked) {
+                disableMouseLock();
+            } else {
+                enableMouseLock();
+            }
+        }
+    });
+}
 
 // Initialize the player
 async function initializePlayer() {
