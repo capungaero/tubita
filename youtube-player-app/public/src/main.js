@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize the application
 function initializeApp() {
-    // Enable mouse lock by default
-    enableMouseLock();
+    // DON'T enable mouse lock yet - only after video starts
+    // Setup mouse unlock listener for Ctrl+F2
     setupMouseUnlockListener();
     
     // Show login popup
@@ -291,6 +291,9 @@ function onPlayerReady(event) {
     event.target.playVideo();
     startWatchTimer();
     
+    // Enable mouse lock when video starts playing
+    enableMouseLock();
+    
     const customPlayBtn = document.getElementById('customPlayButton');
     if (customPlayBtn) {
         customPlayBtn.style.display = 'none';
@@ -450,6 +453,9 @@ function unlockSession() {
         watchedTime = 0;
         warningShown = false;
         currentVideoIndex = 0;
+        
+        // Disable mouse lock untuk login popup
+        disableMouseLock();
         
         // Show login popup again
         usernameInput.value = '';
