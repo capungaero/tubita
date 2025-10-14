@@ -405,6 +405,10 @@ function updateUI() {
 }
 
 // Local Storage Management
+// WARNING: This is a simple client-side implementation for home use with young children.
+// Passwords are stored in plain text in localStorage, which is not secure for sensitive data.
+// This is acceptable for parental controls with young children who don't know about browser dev tools.
+// For production use with sensitive data, implement proper server-side authentication.
 function saveSettings() {
     const settings = {
         videoList: videoList,

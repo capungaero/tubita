@@ -65,3 +65,18 @@ Aplikasi pemutar YouTube yang aman untuk anak-anak dengan kontrol orang tua.
 - Data disimpan di Local Storage browser
 - Password default: `admin123` (segera ubah setelah instalasi pertama)
 - Aplikasi harus dibuka melalui web server atau protokol HTTP/HTTPS untuk YouTube API berfungsi dengan baik
+
+## Keamanan dan Keterbatasan
+
+⚠️ **Penting**: Aplikasi ini adalah solusi sederhana untuk kontrol orang tua di rumah. Beberapa keterbatasan:
+
+- Password disimpan di Local Storage browser dalam bentuk plain text (tidak terenkripsi)
+- Anak yang memiliki pengetahuan teknis dapat mengakses browser console dan melihat/mengubah data
+- Aplikasi ini paling cocok untuk anak kecil yang belum memahami developer tools browser
+- Untuk keamanan lebih tinggi, pertimbangkan untuk menggunakan solusi berbasis server dengan autentikasi yang lebih kuat
+
+**Rekomendasi**: 
+- Gunakan aplikasi ini untuk anak usia di bawah 10 tahun
+- Pantau secara berkala aktivitas menonton
+- Ganti password secara rutin
+- Jangan gunakan password yang sama dengan akun penting lainnya
