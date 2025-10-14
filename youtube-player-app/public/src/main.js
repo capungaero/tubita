@@ -383,7 +383,7 @@ function updateWatchTimeDisplay() {
     if (watchTimeSpan) {
         const minutes = Math.floor(watchedTime / 60);
         const seconds = watchedTime % 60;
-        watchTimeSpan.textContent = `\${minutes}:\${seconds.toString().padStart(2, '0')}`;
+        watchTimeSpan.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
     
     // Update progress bar
@@ -391,7 +391,7 @@ function updateWatchTimeDisplay() {
     if (progressBar) {
         const timeLimit = settings.timeLimit * 60;
         const percentage = (watchedTime / timeLimit) * 100;
-        progressBar.style.width = `\${percentage}%`;
+        progressBar.style.width = `${percentage}%`;
         
         // Change color based on time
         if (percentage > 80) {
