@@ -549,13 +549,19 @@ function loadVideo(index) {
     
     // Create custom play button overlay AFTER player initialization
     const playerContainer = document.querySelector('.youtube-player-container');
+    console.log('Player container found:', playerContainer);
+    
     if (playerContainer && !document.getElementById('customPlayButton')) {
+        console.log('Creating custom play button...');
         const playBtn = document.createElement('div');
         playBtn.id = 'customPlayButton';
         playBtn.className = 'custom-play-button';
         playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        playBtn.style.display = 'none'; // Hidden initially, shown in onPlayerReady
+        playBtn.style.display = 'flex'; // Show immediately
+        playBtn.style.zIndex = '99999';
+        playBtn.style.pointerEvents = 'auto';
         playerContainer.appendChild(playBtn);
+        console.log('Custom play button created and appended');
     }
     
     // Setup custom play button overlay
@@ -602,12 +608,30 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
+    console.log('onPlayerReady called');
+    
     // DON'T autoplay - wait for user to click play button
     // Show custom play button
     const customPlayBtn = document.getElementById('customPlayButton');
+    console.log('Looking for play button in onPlayerReady:', customPlayBtn);
+    
     if (customPlayBtn) {
+        console.log('Setting play button display to flex');
         customPlayBtn.style.display = 'flex'; // Show play button
+        customPlayBtn.style.zIndex = '99999';
+        customPlayBtn.style.pointerEvents = 'auto';
+    } else {
+        console.error('Play button not found in onPlayerReady!');
     }
+    
+    // Fallback: Try again after a delay
+    setTimeout(() => {
+        const btn = document.getElementById('customPlayButton');
+        if (btn && btn.style.display === 'none') {
+            console.log('Fallback: Showing play button');
+            btn.style.display = 'flex';
+        }
+    }, 500);
 }
 
 // Block all YouTube links
