@@ -534,7 +534,7 @@ function loadVideo(index) {
         width: '100%',
         videoId: video.id,
         playerVars: {
-            'autoplay': 1,
+            'autoplay': 0,  // Disable autoplay - wait for user click
             'controls': 0,
             'disablekb': 1,
             'fs': 0,
@@ -560,8 +560,22 @@ function loadVideo(index) {
         if (customBtn) {
             customBtn.addEventListener('click', () => {
                 if (player) {
+                    // Play video
                     player.playVideo();
+                    
+                    // Hide play button
                     customBtn.style.display = 'none';
+                    
+                    // Start watch timer
+                    startWatchTimer();
+                    
+                    // Enable mouse lock ONLY after user clicks play
+                    enableMouseLock();
+                    
+                    // Block YouTube links
+                    setTimeout(() => {
+                        blockYouTubeLinks();
+                    }, 1000);
                 }
             });
         }
@@ -570,39 +584,12 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
-    // Try to play with sound first (user just clicked confirm button)
-    event.target.playVideo();
-    
-    // Fallback: if unmuted autoplay fails, try muted then unmute
-    setTimeout(() => {
-        if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
-            event.target.mute();
-            event.target.playVideo();
-            
-            // Try to unmute after playing starts
-            setTimeout(() => {
-                try {
-                    event.target.unMute();
-                } catch (e) {
-                    console.log('Unmute failed, keeping muted:', e);
-                }
-            }, 1000);
-        }
-    }, 500);
-    
-    startWatchTimer();
-    
-    // Enable mouse lock when video starts playing
-    enableMouseLock();
-    
+    // DON'T autoplay - wait for user to click play button
+    // Show custom play button
     const customPlayBtn = document.getElementById('customPlayButton');
     if (customPlayBtn) {
-        customPlayBtn.style.display = 'none';
+        customPlayBtn.style.display = 'flex'; // Show play button
     }
-    
-    setTimeout(() => {
-        blockYouTubeLinks();
-    }, 1000);
 }
 
 // Block all YouTube links

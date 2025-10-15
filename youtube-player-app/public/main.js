@@ -362,7 +362,7 @@ function toggleVideoSelection(card, video) {
     } else {
         // Check if max limit reached
         if (selectedVideos.length >= maxVideos) {
-            alert(`Maksimal hanya \${maxVideos} video yang bisa dipilih!`);
+            alert(`Maksimal hanya ${maxVideos} video yang bisa dipilih!`);
             return;
         }
         
@@ -439,11 +439,14 @@ function confirmAndStartPlaying() {
     currentVideoIndex = 0;
     watchedTime = 0;
     
-    // Enable fullscreen
+    // Enable fullscreen immediately (user just clicked, so user gesture is active)
     requestFullscreen();
     
-    // Start playing videos
-    initializePlayer();
+    // Small delay to ensure fullscreen is applied before starting video
+    setTimeout(() => {
+        // Start playing videos
+        initializePlayer();
+    }, 300);
 }
 
 // Start watching session
@@ -531,7 +534,7 @@ function loadVideo(index) {
         width: '100%',
         videoId: video.id,
         playerVars: {
-            'autoplay': 1,
+            'autoplay': 0,  // Disable autoplay - wait for user click
             'controls': 0,
             'disablekb': 1,
             'fs': 0,
@@ -557,8 +560,22 @@ function loadVideo(index) {
         if (customBtn) {
             customBtn.addEventListener('click', () => {
                 if (player) {
+                    // Play video
                     player.playVideo();
+                    
+                    // Hide play button
                     customBtn.style.display = 'none';
+                    
+                    // Start watch timer
+                    startWatchTimer();
+                    
+                    // Enable mouse lock ONLY after user clicks play
+                    enableMouseLock();
+                    
+                    // Block YouTube links
+                    setTimeout(() => {
+                        blockYouTubeLinks();
+                    }, 1000);
                 }
             });
         }
@@ -567,35 +584,12 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
-    // Mute first to ensure autoplay works (bypass browser policy)
-    event.target.mute();
-    event.target.playVideo();
-    
-    // Unmute after video starts playing
-    setTimeout(() => {
-        event.target.unMute();
-    }, 500);
-    
-    // Fallback: ensure video plays after a short delay
-    setTimeout(() => {
-        if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
-            player.playVideo();
-        }
-    }, 1000);
-    
-    startWatchTimer();
-    
-    // Enable mouse lock when video starts playing
-    enableMouseLock();
-    
+    // DON'T autoplay - wait for user to click play button
+    // Show custom play button
     const customPlayBtn = document.getElementById('customPlayButton');
     if (customPlayBtn) {
-        customPlayBtn.style.display = 'none';
+        customPlayBtn.style.display = 'flex'; // Show play button
     }
-    
-    setTimeout(() => {
-        blockYouTubeLinks();
-    }, 1000);
 }
 
 // Block all YouTube links
