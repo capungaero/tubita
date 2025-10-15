@@ -546,92 +546,104 @@ function loadVideo(index) {
             'onStateChange': onPlayerStateChange
         }
     });
-    
-    // Create custom play button overlay AFTER player initialization
-    const playerContainer = document.querySelector('.youtube-player-container');
-    console.log('Player container found:', playerContainer);
-    
-    if (playerContainer && !document.getElementById('customPlayButton')) {
-        console.log('Creating custom play button...');
-        const playBtn = document.createElement('div');
-        playBtn.id = 'customPlayButton';
-        playBtn.className = 'custom-play-button';
-        playBtn.innerHTML = '<i class="fas fa-play"></i>';
-        playBtn.style.display = 'flex'; // Show immediately
-        playBtn.style.zIndex = '99999';
-        playBtn.style.pointerEvents = 'auto';
-        playerContainer.appendChild(playBtn);
-        console.log('Custom play button created and appended');
-    }
-    
-    // Setup custom play button overlay
-    setTimeout(() => {
-        const customBtn = document.getElementById('customPlayButton');
-        console.log('Custom play button found:', customBtn);
-        if (customBtn) {
-            customBtn.addEventListener('click', () => {
-                console.log('Play button clicked!');
-                if (player) {
-                    // Request fullscreen (user just clicked, so gesture is active)
-                    requestFullscreen();
-                    
-                    // Play video
-                    player.playVideo();
-                    
-                    // Hide play button
-                    customBtn.style.display = 'none';
-                    
-                    // Start watch timer
-                    startWatchTimer();
-                    
-                    // Enable mouse lock ONLY after user clicks play
-                    console.log('Enabling mouse lock...');
-                    enableMouseLock();
-                    
-                    // Fallback: Ensure mouse lock after 10 seconds
-                    setTimeout(() => {
-                        if (!mouseLocked) {
-                            console.log('Fallback: Enabling mouse lock after 10 seconds');
-                            enableMouseLock();
-                        }
-                    }, 10000);
-                    
-                    // Block YouTube links
-                    setTimeout(() => {
-                        blockYouTubeLinks();
-                    }, 1000);
-                }
-            });
-        }
-    }, 100);
 }
 
 // Player ready event
 function onPlayerReady(event) {
     console.log('onPlayerReady called');
     
-    // DON'T autoplay - wait for user to click play button
-    // Show custom play button
-    const customPlayBtn = document.getElementById('customPlayButton');
-    console.log('Looking for play button in onPlayerReady:', customPlayBtn);
-    
-    if (customPlayBtn) {
-        console.log('Setting play button display to flex');
-        customPlayBtn.style.display = 'flex'; // Show play button
-        customPlayBtn.style.zIndex = '99999';
-        customPlayBtn.style.pointerEvents = 'auto';
-    } else {
-        console.error('Play button not found in onPlayerReady!');
+    // Show big play button popup
+    showBigPlayButtonPopup();
+}
+
+// Show big play button as popup
+function showBigPlayButtonPopup() {
+    // Remove any existing popup
+    const existingPopup = document.getElementById('big-play-popup');
+    if (existingPopup) {
+        existingPopup.remove();
     }
     
-    // Fallback: Try again after a delay
-    setTimeout(() => {
-        const btn = document.getElementById('customPlayButton');
-        if (btn && btn.style.display === 'none') {
-            console.log('Fallback: Showing play button');
-            btn.style.display = 'flex';
+    // Create popup overlay
+    const popup = document.createElement('div');
+    popup.id = 'big-play-popup';
+    popup.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+        backdrop-filter: blur(10px);
+    `;
+    
+    // Create play button
+    const playButton = document.createElement('div');
+    playButton.className = 'big-play-button';
+    playButton.innerHTML = `
+        <div style="text-align: center;">
+            <div style="font-size: 120px; margin-bottom: 20px;">
+                <i class="fas fa-play-circle"></i>
+            </div>
+            <div style="font-size: 32px; font-weight: bold; color: white; font-family: 'Comic Sans MS', cursive;">
+                🎬 Klik untuk Mulai Menonton! 🎬
+            </div>
+        </div>
+    `;
+    playButton.style.cssText = `
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        color: #ff6b9d;
+        text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    `;
+    
+    // Hover effect
+    playButton.addEventListener('mouseenter', () => {
+        playButton.style.transform = 'scale(1.1)';
+    });
+    playButton.addEventListener('mouseleave', () => {
+        playButton.style.transform = 'scale(1)';
+    });
+    
+    // Click handler
+    playButton.addEventListener('click', () => {
+        console.log('Big play button clicked!');
+        
+        // Remove popup
+        popup.remove();
+        
+        // Request fullscreen
+        requestFullscreen();
+        
+        // Play video
+        if (player) {
+            player.playVideo();
+            startWatchTimer();
         }
-    }, 500);
+        
+        // Lock mouse after 3 seconds
+        console.log('Mouse will be locked in 3 seconds...');
+        showMouseLockCountdown(3);
+        
+        setTimeout(() => {
+            console.log('Locking mouse now...');
+            enableMouseLock();
+        }, 3000);
+        
+        // Block YouTube links
+        setTimeout(() => {
+            blockYouTubeLinks();
+        }, 1000);
+    });
+    
+    popup.appendChild(playButton);
+    document.body.appendChild(popup);
+    
+    console.log('Big play button popup shown');
 }
 
 // Block all YouTube links
