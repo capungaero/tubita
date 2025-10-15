@@ -67,6 +67,27 @@
             </div>
         </div>
         
+        <!-- Play Confirmation Modal -->
+        <div id="play-confirmation-modal" class="modal">
+            <div class="modal-content login-modal">
+                <h2>🎬 Siap Menonton? 🎬</h2>
+                <p id="play-confirmation-message">Klik tombol di bawah untuk mulai menonton video!</p>
+                
+                <div class="playlist-preview" id="playlist-preview">
+                    <!-- Playlist preview will be shown here -->
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="confirm-play-btn" class="btn-primary">
+                        <i class="fas fa-play-circle"></i> 🚀 Putar Video Sekarang!
+                    </button>
+                    <button id="change-playlist-btn" class="btn-secondary" style="background: linear-gradient(135deg, #ffa84c 0%, #ff8c42 100%);">
+                        <i class="fas fa-edit"></i> Ubah Playlist
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <!-- End Session Modal -->
         <div id="end-session-modal" class="modal">
             <div class="modal-content end-modal">

@@ -1925,3 +1925,39 @@ button:disabled:hover {
     font-size: 13px;
     line-height: 1.6;
 }
+
+/* Playlist Preview */
+.playlist-preview {
+    margin: 20px 0;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255,107,157,0.1) 0%, rgba(192,111,253,0.1) 100%);
+    border-radius: 12px;
+    border: 2px solid #ff6b9d;
+}
+
+.playlist-preview h3 {
+    color: #c06ffd;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.playlist-preview ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.playlist-preview li {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95em;
+}
+
+.playlist-preview li i {
+    color: #ff6b9d;
+}

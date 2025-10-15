@@ -27,6 +27,10 @@ let mouseUnlockKey = 'F2';
 // DOM Elements
 const videoContainer = document.getElementById('video-container');
 const loginPopup = document.getElementById('login-popup');
+const playConfirmationModal = document.getElementById('play-confirmation-modal');
+const confirmPlayBtn = document.getElementById('confirm-play-btn');
+const changePlaylistBtn = document.getElementById('change-playlist-btn');
+const playlistPreview = document.getElementById('playlist-preview');
 const endSessionModal = document.getElementById('end-session-modal');
 const usernameInput = document.getElementById('username');
 const videoSelectionGrid = document.getElementById('video-selection');
@@ -44,8 +48,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     initializeApp();
     
-    // Load available videos after auto-load
-    loadAvailableVideos();
+    // Check if there's a saved playlist in cache
+    const savedPlaylist = JSON.parse(localStorage.getItem('selectedPlaylist')) || null;
+    const savedUser = localStorage.getItem('currentUser') || null;
+    
+    if (savedPlaylist && savedPlaylist.length > 0 && savedUser) {
+        // User has saved playlist, show play confirmation
+        showPlayConfirmation(savedUser, savedPlaylist);
+    } else {
+        // No saved playlist, show video selection
+        loadAvailableVideos();
+    }
 });
 
 // Auto-load playlist from URL
@@ -173,6 +186,43 @@ function hidePlaylistLoadingStatus() {
     }
 }
 
+// Show play confirmation with saved playlist
+function showPlayConfirmation(username, playlist) {
+    currentUser = username;
+    selectedVideos = playlist;
+    
+    // Hide login popup
+    if (loginPopup) {
+        loginPopup.classList.remove('active');
+    }
+    
+    // Show play confirmation modal
+    if (playConfirmationModal) {
+        playConfirmationModal.classList.add('active');
+        
+        // Update message
+        const message = document.getElementById('play-confirmation-message');
+        if (message) {
+            message.textContent = `Halo ${username}! Kamu punya ${playlist.length} video di playlist.`;
+        }
+        
+        // Show playlist preview
+        if (playlistPreview) {
+            playlistPreview.innerHTML = `
+                <h3>📋 Playlist Kamu:</h3>
+                <ul>
+                    ${playlist.map((video, index) => `
+                        <li>
+                            <i class="fas fa-play-circle"></i>
+                            <span>${index + 1}. ${video.title}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+    }
+}
+
 // Monitor fullscreen changes and re-enable if user exits
 document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && sessionActive) {
@@ -198,12 +248,41 @@ document.addEventListener('keydown', (e) => {
 
 // Initialize the application
 function initializeApp() {
-    // DON'T enable mouse lock yet - only after video starts
+    // DON'T enable mouse lock yet - only after user confirms play
     // Setup mouse unlock listener for Ctrl+F2
     setupMouseUnlockListener();
     
     // Setup event listeners
     setupLoginListeners();
+    
+    // Setup confirm play button
+    if (confirmPlayBtn) {
+        confirmPlayBtn.addEventListener('click', confirmAndStartPlaying);
+    }
+    
+    // Setup change playlist button
+    if (changePlaylistBtn) {
+        changePlaylistBtn.addEventListener('click', () => {
+            // Clear saved playlist
+            localStorage.removeItem('selectedPlaylist');
+            localStorage.removeItem('currentUser');
+            selectedVideos = [];
+            currentUser = null;
+            
+            // Hide play confirmation modal
+            if (playConfirmationModal) {
+                playConfirmationModal.classList.remove('active');
+            }
+            
+            // Show login popup
+            if (loginPopup) {
+                loginPopup.classList.add('active');
+            }
+            
+            // Load available videos
+            loadAvailableVideos();
+        });
+    }
     
     // Setup fullscreen button
     const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -343,6 +422,30 @@ function setupLoginListeners() {
     });
 }
 
+// Confirm and start playing from saved playlist
+function confirmAndStartPlaying() {
+    if (!selectedVideos || selectedVideos.length === 0) {
+        alert('Tidak ada video di playlist!');
+        return;
+    }
+    
+    // Hide play confirmation modal
+    if (playConfirmationModal) {
+        playConfirmationModal.classList.remove('active');
+    }
+    
+    // Set session as active
+    sessionActive = true;
+    currentVideoIndex = 0;
+    watchedTime = 0;
+    
+    // Enable fullscreen
+    requestFullscreen();
+    
+    // Start playing videos
+    initializePlayer();
+}
+
 // Start watching session
 function startWatchingSession() {
     const username = usernameInput.value.trim();
@@ -357,20 +460,17 @@ function startWatchingSession() {
         return;
     }
     
-    // Save session data
+    // Save session data to cache
     currentUser = username;
-    sessionActive = true;
-    currentVideoIndex = 0;
-    watchedTime = 0;
+    localStorage.setItem('currentUser', username);
+    localStorage.setItem('selectedPlaylist', JSON.stringify(selectedVideos));
     
-    // Hide login popup
+    // Show confirmation message
+    alert(`Playlist kamu sudah disimpan! Kamu bisa langsung putar video kapan saja.`);
+    
+    // Redirect to show play confirmation instead of starting immediately
     loginPopup.classList.remove('active');
-    
-    // Auto fullscreen when starting session
-    requestFullscreen();
-    
-    // Start playing videos
-    initializePlayer();
+    showPlayConfirmation(username, selectedVideos);
 }
 
 // Initialize YouTube Player API
@@ -467,7 +567,22 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
+    // Mute first to ensure autoplay works (bypass browser policy)
+    event.target.mute();
     event.target.playVideo();
+    
+    // Unmute after video starts playing
+    setTimeout(() => {
+        event.target.unMute();
+    }, 500);
+    
+    // Fallback: ensure video plays after a short delay
+    setTimeout(() => {
+        if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+            player.playVideo();
+        }
+    }, 1000);
+    
     startWatchTimer();
     
     // Enable mouse lock when video starts playing

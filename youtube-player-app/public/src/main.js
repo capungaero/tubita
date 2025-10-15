@@ -27,6 +27,10 @@ let mouseUnlockKey = 'F2';
 // DOM Elements
 const videoContainer = document.getElementById('video-container');
 const loginPopup = document.getElementById('login-popup');
+const playConfirmationModal = document.getElementById('play-confirmation-modal');
+const confirmPlayBtn = document.getElementById('confirm-play-btn');
+const changePlaylistBtn = document.getElementById('change-playlist-btn');
+const playlistPreview = document.getElementById('playlist-preview');
 const endSessionModal = document.getElementById('end-session-modal');
 const usernameInput = document.getElementById('username');
 const videoSelectionGrid = document.getElementById('video-selection');
@@ -39,40 +43,21 @@ const unlockError = document.getElementById('unlock-error');
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check if there's an active session in cache
-    const cachedSessionActive = localStorage.getItem('sessionActive') === 'true';
-    const cachedSelectedVideos = JSON.parse(localStorage.getItem('selectedVideos') || '[]');
-    const cachedUser = localStorage.getItem('currentUser');
-    
     // Auto-load playlist from URL if enabled
     await autoLoadPlaylistFromUrl();
     
     initializeApp();
     
-    // If there's an active session, restore it
-    if (cachedSessionActive && cachedSelectedVideos.length > 0 && cachedUser) {
-        console.log('🔄 Restoring session from cache...', {
-            user: cachedUser,
-            videos: cachedSelectedVideos.length
-        });
-        
-        // Restore session data
-        currentUser = cachedUser;
-        selectedVideos = cachedSelectedVideos;
-        sessionActive = true;
-        currentVideoIndex = 0;
-        watchedTime = 0;
-        
-        // Hide login popup and start playing
-        loginPopup.classList.remove('active');
-        requestFullscreen();
-        initializePlayer();
-        
-        console.log('✅ Session restored, autoplay started!');
+    // Check if there's a saved playlist in cache
+    const savedPlaylist = JSON.parse(localStorage.getItem('selectedPlaylist')) || null;
+    const savedUser = localStorage.getItem('currentUser') || null;
+    
+    if (savedPlaylist && savedPlaylist.length > 0 && savedUser) {
+        // User has saved playlist, show play confirmation
+        showPlayConfirmation(savedUser, savedPlaylist);
     } else {
-        // No active session, show login popup with video selection
+        // No saved playlist, show video selection
         loadAvailableVideos();
-        console.log('📺 Showing video selection popup');
     }
 });
 
@@ -201,6 +186,43 @@ function hidePlaylistLoadingStatus() {
     }
 }
 
+// Show play confirmation with saved playlist
+function showPlayConfirmation(username, playlist) {
+    currentUser = username;
+    selectedVideos = playlist;
+    
+    // Hide login popup
+    if (loginPopup) {
+        loginPopup.classList.remove('active');
+    }
+    
+    // Show play confirmation modal
+    if (playConfirmationModal) {
+        playConfirmationModal.classList.add('active');
+        
+        // Update message
+        const message = document.getElementById('play-confirmation-message');
+        if (message) {
+            message.textContent = `Halo ${username}! Kamu punya ${playlist.length} video di playlist.`;
+        }
+        
+        // Show playlist preview
+        if (playlistPreview) {
+            playlistPreview.innerHTML = `
+                <h3>📋 Playlist Kamu:</h3>
+                <ul>
+                    ${playlist.map((video, index) => `
+                        <li>
+                            <i class="fas fa-play-circle"></i>
+                            <span>${index + 1}. ${video.title}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+    }
+}
+
 // Monitor fullscreen changes and re-enable if user exits
 document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && sessionActive) {
@@ -226,12 +248,41 @@ document.addEventListener('keydown', (e) => {
 
 // Initialize the application
 function initializeApp() {
-    // DON'T enable mouse lock yet - only after video starts
+    // DON'T enable mouse lock yet - only after user confirms play
     // Setup mouse unlock listener for Ctrl+F2
     setupMouseUnlockListener();
     
     // Setup event listeners
     setupLoginListeners();
+    
+    // Setup confirm play button
+    if (confirmPlayBtn) {
+        confirmPlayBtn.addEventListener('click', confirmAndStartPlaying);
+    }
+    
+    // Setup change playlist button
+    if (changePlaylistBtn) {
+        changePlaylistBtn.addEventListener('click', () => {
+            // Clear saved playlist
+            localStorage.removeItem('selectedPlaylist');
+            localStorage.removeItem('currentUser');
+            selectedVideos = [];
+            currentUser = null;
+            
+            // Hide play confirmation modal
+            if (playConfirmationModal) {
+                playConfirmationModal.classList.remove('active');
+            }
+            
+            // Show login popup
+            if (loginPopup) {
+                loginPopup.classList.add('active');
+            }
+            
+            // Load available videos
+            loadAvailableVideos();
+        });
+    }
     
     // Setup fullscreen button
     const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -371,6 +422,30 @@ function setupLoginListeners() {
     });
 }
 
+// Confirm and start playing from saved playlist
+function confirmAndStartPlaying() {
+    if (!selectedVideos || selectedVideos.length === 0) {
+        alert('Tidak ada video di playlist!');
+        return;
+    }
+    
+    // Hide play confirmation modal
+    if (playConfirmationModal) {
+        playConfirmationModal.classList.remove('active');
+    }
+    
+    // Set session as active
+    sessionActive = true;
+    currentVideoIndex = 0;
+    watchedTime = 0;
+    
+    // Enable fullscreen
+    requestFullscreen();
+    
+    // Start playing videos
+    initializePlayer();
+}
+
 // Start watching session
 function startWatchingSession() {
     const username = usernameInput.value.trim();
@@ -385,31 +460,17 @@ function startWatchingSession() {
         return;
     }
     
-    // Save session data to localStorage (cache)
+    // Save session data to cache
     currentUser = username;
-    sessionActive = true;
-    currentVideoIndex = 0;
-    watchedTime = 0;
+    localStorage.setItem('currentUser', username);
+    localStorage.setItem('selectedPlaylist', JSON.stringify(selectedVideos));
     
-    // Save selected videos to cache
-    localStorage.setItem('selectedVideos', JSON.stringify(selectedVideos));
-    localStorage.setItem('currentUser', currentUser);
-    localStorage.setItem('sessionActive', 'true');
+    // Show confirmation message
+    alert(`Playlist kamu sudah disimpan! Kamu bisa langsung putar video kapan saja.`);
     
-    console.log('✅ Session data saved to cache:', {
-        user: currentUser,
-        videos: selectedVideos.length,
-        list: selectedVideos.map(v => v.title)
-    });
-    
-    // Hide login popup
+    // Redirect to show play confirmation instead of starting immediately
     loginPopup.classList.remove('active');
-    
-    // Auto fullscreen when starting session
-    requestFullscreen();
-    
-    // Start playing videos
-    initializePlayer();
+    showPlayConfirmation(username, selectedVideos);
 }
 
 // Initialize YouTube Player API
@@ -506,24 +567,21 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
-    // Start with unmuted (works because user clicked "Start Watching")
-    event.target.unMute();
-    event.target.setVolume(100);
+    // Mute first to ensure autoplay works (bypass browser policy)
+    event.target.mute();
     event.target.playVideo();
     
-    // Monitor if autoplay succeeded
+    // Unmute after video starts playing
     setTimeout(() => {
-        const playerState = player.getPlayerState();
-        
-        // If autoplay failed (not playing), use muted fallback
-        if (playerState !== YT.PlayerState.PLAYING) {
-            console.log('⚠️ Autoplay blocked, retrying with muted...');
-            event.target.mute();
-            event.target.playVideo();
-        } else {
-            console.log('✅ Video autoplaying with sound');
-        }
+        event.target.unMute();
     }, 500);
+    
+    // Fallback: ensure video plays after a short delay
+    setTimeout(() => {
+        if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+            player.playVideo();
+        }
+    }, 1000);
     
     startWatchTimer();
     
@@ -663,12 +721,6 @@ function endWatchingSession(message) {
     
     // Lock session
     sessionActive = false;
-    
-    // Clear cache when session ends
-    localStorage.removeItem('sessionActive');
-    
-    console.log('⏹️ Session ended, cache updated');
-    
     document.body.classList.add('session-locked');
     
     // Show end modal
@@ -695,14 +747,6 @@ function unlockSession() {
         watchedTime = 0;
         warningShown = false;
         currentVideoIndex = 0;
-        sessionActive = false;
-        
-        // Clear cache
-        localStorage.removeItem('selectedVideos');
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('sessionActive');
-        
-        console.log('🔓 Session unlocked, cache cleared');
         
         // Disable mouse lock untuk login popup
         disableMouseLock();
