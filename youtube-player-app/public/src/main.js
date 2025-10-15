@@ -39,13 +39,41 @@ const unlockError = document.getElementById('unlock-error');
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
+    // Check if there's an active session in cache
+    const cachedSessionActive = localStorage.getItem('sessionActive') === 'true';
+    const cachedSelectedVideos = JSON.parse(localStorage.getItem('selectedVideos') || '[]');
+    const cachedUser = localStorage.getItem('currentUser');
+    
     // Auto-load playlist from URL if enabled
     await autoLoadPlaylistFromUrl();
     
     initializeApp();
     
-    // Load available videos after auto-load
-    loadAvailableVideos();
+    // If there's an active session, restore it
+    if (cachedSessionActive && cachedSelectedVideos.length > 0 && cachedUser) {
+        console.log('🔄 Restoring session from cache...', {
+            user: cachedUser,
+            videos: cachedSelectedVideos.length
+        });
+        
+        // Restore session data
+        currentUser = cachedUser;
+        selectedVideos = cachedSelectedVideos;
+        sessionActive = true;
+        currentVideoIndex = 0;
+        watchedTime = 0;
+        
+        // Hide login popup and start playing
+        loginPopup.classList.remove('active');
+        requestFullscreen();
+        initializePlayer();
+        
+        console.log('✅ Session restored, autoplay started!');
+    } else {
+        // No active session, show login popup with video selection
+        loadAvailableVideos();
+        console.log('📺 Showing video selection popup');
+    }
 });
 
 // Auto-load playlist from URL
@@ -357,11 +385,22 @@ function startWatchingSession() {
         return;
     }
     
-    // Save session data
+    // Save session data to localStorage (cache)
     currentUser = username;
     sessionActive = true;
     currentVideoIndex = 0;
     watchedTime = 0;
+    
+    // Save selected videos to cache
+    localStorage.setItem('selectedVideos', JSON.stringify(selectedVideos));
+    localStorage.setItem('currentUser', currentUser);
+    localStorage.setItem('sessionActive', 'true');
+    
+    console.log('✅ Session data saved to cache:', {
+        user: currentUser,
+        videos: selectedVideos.length,
+        list: selectedVideos.map(v => v.title)
+    });
     
     // Hide login popup
     loginPopup.classList.remove('active');
@@ -621,6 +660,12 @@ function endWatchingSession(message) {
     
     // Lock session
     sessionActive = false;
+    
+    // Clear cache when session ends
+    localStorage.removeItem('sessionActive');
+    
+    console.log('⏹️ Session ended, cache updated');
+    
     document.body.classList.add('session-locked');
     
     // Show end modal
@@ -647,6 +692,14 @@ function unlockSession() {
         watchedTime = 0;
         warningShown = false;
         currentVideoIndex = 0;
+        sessionActive = false;
+        
+        // Clear cache
+        localStorage.removeItem('selectedVideos');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('sessionActive');
+        
+        console.log('🔓 Session unlocked, cache cleared');
         
         // Disable mouse lock untuk login popup
         disableMouseLock();
