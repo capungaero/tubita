@@ -43,8 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await autoLoadPlaylistFromUrl();
     
     initializeApp();
-    // Auto fullscreen on first load
-    requestFullscreen();
+    
+    // Load available videos after auto-load
+    loadAvailableVideos();
 });
 
 // Auto-load playlist from URL
@@ -63,12 +64,20 @@ async function autoLoadPlaylistFromUrl() {
         url = 'https://' + url;
     }
     
+    // Use AllOrigins CORS proxy
+    const corsProxy = 'https://api.allorigins.win/raw?url=';
+    const proxiedUrl = corsProxy + encodeURIComponent(url);
+    
     console.log('Auto-loading playlist from:', url);
+    
+    // Show loading status
+    showPlaylistLoadingStatus('🔄 Loading playlist dari URL...', 'loading');
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(proxiedUrl);
         if (!response.ok) {
             console.error('Failed to load playlist:', response.status);
+            showPlaylistLoadingStatus('❌ Gagal load playlist dari URL', 'error');
             return;
         }
 
@@ -79,9 +88,16 @@ async function autoLoadPlaylistFromUrl() {
             videoList = videos;
             localStorage.setItem('videoList', JSON.stringify(videoList));
             console.log(`Auto-loaded ${videos.length} videos from URL`);
+            showPlaylistLoadingStatus(`✅ Berhasil load ${videos.length} video dari URL!`, 'success');
+            
+            // Hide status after 2 seconds
+            setTimeout(() => {
+                hidePlaylistLoadingStatus();
+            }, 2000);
         }
     } catch (error) {
         console.error('Error auto-loading playlist:', error);
+        showPlaylistLoadingStatus('❌ Error loading playlist: ' + error.message, 'error');
     }
 }
 
@@ -134,6 +150,26 @@ function requestFullscreen() {
         elem.webkitRequestFullscreen();
     } else if (elem.msRequestFullscreen) { /* IE11 */
         elem.msRequestFullscreen();
+    }
+}
+
+// Show playlist loading status
+function showPlaylistLoadingStatus(message, type) {
+    const statusDiv = document.getElementById('playlist-loading');
+    const messageP = statusDiv.querySelector('.status-message');
+    
+    if (statusDiv && messageP) {
+        messageP.textContent = message;
+        statusDiv.className = 'import-status status-' + type;
+        statusDiv.style.display = 'block';
+    }
+}
+
+// Hide playlist loading status
+function hidePlaylistLoadingStatus() {
+    const statusDiv = document.getElementById('playlist-loading');
+    if (statusDiv) {
+        statusDiv.style.display = 'none';
     }
 }
 
@@ -329,6 +365,9 @@ function startWatchingSession() {
     
     // Hide login popup
     loginPopup.classList.remove('active');
+    
+    // Auto fullscreen when starting session
+    requestFullscreen();
     
     // Start playing videos
     initializePlayer();
