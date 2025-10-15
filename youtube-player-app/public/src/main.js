@@ -40,6 +40,46 @@ const unlockError = document.getElementById('unlock-error');
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
+    // Auto fullscreen on first load
+    requestFullscreen();
+});
+
+// Request fullscreen function
+function requestFullscreen() {
+    const elem = document.documentElement;
+    
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(err => {
+            console.log('Fullscreen request failed:', err);
+        });
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+    }
+}
+
+// Monitor fullscreen changes and re-enable if user exits
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && sessionActive) {
+        // If user exits fullscreen during session, re-enter
+        setTimeout(() => {
+            requestFullscreen();
+        }, 500);
+    }
+});
+
+// Add keyboard shortcut for fullscreen (F11 alternative)
+document.addEventListener('keydown', (e) => {
+    // F11 to toggle fullscreen
+    if (e.key === 'F11') {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            requestFullscreen();
+        }
+    }
 });
 
 // Initialize the application
@@ -48,11 +88,33 @@ function initializeApp() {
     // Setup mouse unlock listener for Ctrl+F2
     setupMouseUnlockListener();
     
-    // Show login popup
-    showLoginPopup();
-    
     // Setup event listeners
     setupLoginListeners();
+    
+    // Setup fullscreen button
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> Fullscreen';
+            } else {
+                requestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Exit Fullscreen';
+            }
+        });
+    }
+    
+    // Update button icon on fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+        if (fullscreenBtn) {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Exit Fullscreen';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> Fullscreen';
+            }
+        }
+    });
 }
 
 // Show login popup
