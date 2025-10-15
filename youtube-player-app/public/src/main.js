@@ -63,10 +63,14 @@ async function autoLoadPlaylistFromUrl() {
         url = 'https://' + url;
     }
     
+    // Use CORS proxy to bypass CORS restrictions
+    const corsProxy = 'https://corsproxy.io/?';
+    const proxiedUrl = corsProxy + encodeURIComponent(url);
+    
     console.log('Auto-loading playlist from:', url);
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(proxiedUrl);
         if (!response.ok) {
             console.error('Failed to load playlist:', response.status);
             return;

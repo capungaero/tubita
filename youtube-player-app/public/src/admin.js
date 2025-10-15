@@ -391,10 +391,14 @@ async function loadPlaylistFromUrl() {
         url = 'https://' + url;
     }
 
+    // Use CORS proxy to bypass CORS restrictions
+    const corsProxy = 'https://corsproxy.io/?';
+    const proxiedUrl = corsProxy + encodeURIComponent(url);
+
     showImportStatus('Loading playlist dari URL...', 'loading');
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(proxiedUrl);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
