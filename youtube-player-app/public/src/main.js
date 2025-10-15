@@ -56,7 +56,12 @@ async function autoLoadPlaylistFromUrl() {
         return;
     }
 
-    const url = autoLoadSettings.url || 'https://capung.web.id/tubita/tubita.txt';
+    let url = autoLoadSettings.url || 'capung.web.id/tubita/tubita.txt';
+    
+    // Add https:// if not present
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
     
     console.log('Auto-loading playlist from:', url);
 

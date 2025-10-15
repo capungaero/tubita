@@ -379,11 +379,16 @@ function setupImportPlaylistHandlers() {
 // Load playlist from URL
 async function loadPlaylistFromUrl() {
     const urlInput = document.getElementById('playlistUrl');
-    const url = urlInput.value.trim();
+    let url = urlInput.value.trim();
 
     if (!url) {
         showImportStatus('Masukkan URL terlebih dahulu', 'error');
         return;
+    }
+
+    // Add https:// if not present
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
     }
 
     showImportStatus('Loading playlist dari URL...', 'loading');
