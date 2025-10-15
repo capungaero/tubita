@@ -506,21 +506,24 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
-    // Mute first to ensure autoplay works (bypass browser policy)
-    event.target.mute();
+    // Start with unmuted (works because user clicked "Start Watching")
+    event.target.unMute();
+    event.target.setVolume(100);
     event.target.playVideo();
     
-    // Unmute after video starts playing
+    // Monitor if autoplay succeeded
     setTimeout(() => {
-        event.target.unMute();
-    }, 500);
-    
-    // Fallback: ensure video plays after a short delay
-    setTimeout(() => {
-        if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
-            player.playVideo();
+        const playerState = player.getPlayerState();
+        
+        // If autoplay failed (not playing), use muted fallback
+        if (playerState !== YT.PlayerState.PLAYING) {
+            console.log('⚠️ Autoplay blocked, retrying with muted...');
+            event.target.mute();
+            event.target.playVideo();
+        } else {
+            console.log('✅ Video autoplaying with sound');
         }
-    }, 1000);
+    }, 500);
     
     startWatchTimer();
     
