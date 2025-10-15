@@ -506,11 +506,7 @@ function loadVideo(index) {
     // Create player container
     videoContainer.innerHTML = `
         <div class="video-player-wrapper">
-            <div id="player" class="youtube-player-container">
-                <div id="customPlayButton" class="custom-play-button">
-                    <i class="fas fa-play"></i>
-                </div>
-            </div>
+            <div id="player" class="youtube-player-container"></div>
             <div class="video-details">
                 <h2>${video.title}</h2>
                 ${video.channelTitle ? `<p class="channel-name"><i class="fas fa-user-circle"></i> ${video.channelTitle}</p>` : ''}
@@ -554,11 +550,24 @@ function loadVideo(index) {
         }
     });
     
+    // Create custom play button overlay AFTER player initialization
+    const playerContainer = document.querySelector('.youtube-player-container');
+    if (playerContainer && !document.getElementById('customPlayButton')) {
+        const playBtn = document.createElement('div');
+        playBtn.id = 'customPlayButton';
+        playBtn.className = 'custom-play-button';
+        playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        playBtn.style.display = 'none'; // Hidden initially, shown in onPlayerReady
+        playerContainer.appendChild(playBtn);
+    }
+    
     // Setup custom play button overlay
     setTimeout(() => {
         const customBtn = document.getElementById('customPlayButton');
+        console.log('Custom play button found:', customBtn);
         if (customBtn) {
             customBtn.addEventListener('click', () => {
+                console.log('Play button clicked!');
                 if (player) {
                     // Play video
                     player.playVideo();
@@ -570,6 +579,7 @@ function loadVideo(index) {
                     startWatchTimer();
                     
                     // Enable mouse lock ONLY after user clicks play
+                    console.log('Enabling mouse lock...');
                     enableMouseLock();
                     
                     // Block YouTube links
