@@ -439,14 +439,11 @@ function confirmAndStartPlaying() {
     currentVideoIndex = 0;
     watchedTime = 0;
     
-    // Enable fullscreen immediately (user just clicked, so user gesture is active)
-    requestFullscreen();
+    // DON'T request fullscreen here - will be done when user clicks play button
+    // This avoids "not initiated by user gesture" error
     
-    // Small delay to ensure fullscreen is applied before starting video
-    setTimeout(() => {
-        // Start playing videos
-        initializePlayer();
-    }, 300);
+    // Start loading player immediately
+    initializePlayer();
 }
 
 // Start watching session
@@ -569,6 +566,9 @@ function loadVideo(index) {
             customBtn.addEventListener('click', () => {
                 console.log('Play button clicked!');
                 if (player) {
+                    // Request fullscreen (user just clicked, so gesture is active)
+                    requestFullscreen();
+                    
                     // Play video
                     player.playVideo();
                     
@@ -581,6 +581,14 @@ function loadVideo(index) {
                     // Enable mouse lock ONLY after user clicks play
                     console.log('Enabling mouse lock...');
                     enableMouseLock();
+                    
+                    // Fallback: Ensure mouse lock after 10 seconds
+                    setTimeout(() => {
+                        if (!mouseLocked) {
+                            console.log('Fallback: Enabling mouse lock after 10 seconds');
+                            enableMouseLock();
+                        }
+                    }, 10000);
                     
                     // Block YouTube links
                     setTimeout(() => {
@@ -630,6 +638,21 @@ function onPlayerStateChange(event) {
             startWatchTimer();
         }
         if (customPlayBtn) customPlayBtn.style.display = 'none';
+        
+        // Fallback mouse lock: Enable after 10 seconds of playing
+        if (!mouseLocked) {
+            console.log('Video is playing, will enable mouse lock in 10 seconds...');
+            
+            // Show countdown notification
+            showMouseLockCountdown(10);
+            
+            setTimeout(() => {
+                if (!mouseLocked) {
+                    console.log('Fallback: Enabling mouse lock after 10 seconds of playback');
+                    enableMouseLock();
+                }
+            }, 10000);
+        }
     } else if (event.data === YT.PlayerState.PAUSED) {
         pauseWatchTimer();
         if (customPlayBtn) {
@@ -818,6 +841,55 @@ function disableMouseLock() {
     }
     
     showUnlockNotification();
+}
+
+// Show mouse lock countdown
+function showMouseLockCountdown(seconds) {
+    const existingCountdown = document.getElementById('mouse-lock-countdown');
+    if (existingCountdown) {
+        existingCountdown.remove();
+    }
+    
+    const countdown = document.createElement('div');
+    countdown.id = 'mouse-lock-countdown';
+    countdown.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 107, 157, 0.95);
+        color: white;
+        padding: 30px 50px;
+        border-radius: 20px;
+        font-size: 24px;
+        z-index: 999998;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        text-align: center;
+        font-family: 'Comic Sans MS', cursive;
+        border: 4px solid white;
+    `;
+    countdown.innerHTML = `
+        <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
+        <div>Mouse akan dikunci dalam</div>
+        <div style="font-size: 64px; font-weight: bold; margin: 10px 0;" id="countdown-number">${seconds}</div>
+        <div style="font-size: 18px;">detik...</div>
+    `;
+    
+    document.body.appendChild(countdown);
+    
+    let remaining = seconds;
+    const countdownInterval = setInterval(() => {
+        remaining--;
+        const numberEl = document.getElementById('countdown-number');
+        if (numberEl) {
+            numberEl.textContent = remaining;
+        }
+        
+        if (remaining <= 0 || mouseLocked) {
+            clearInterval(countdownInterval);
+            countdown.remove();
+        }
+    }, 1000);
 }
 
 function showLockIndicator() {
