@@ -362,7 +362,7 @@ function toggleVideoSelection(card, video) {
     } else {
         // Check if max limit reached
         if (selectedVideos.length >= maxVideos) {
-            alert(`Maksimal hanya \${maxVideos} video yang bisa dipilih!`);
+            alert(`Maksimal hanya ${maxVideos} video yang bisa dipilih!`);
             return;
         }
         
@@ -439,11 +439,14 @@ function confirmAndStartPlaying() {
     currentVideoIndex = 0;
     watchedTime = 0;
     
-    // Enable fullscreen
+    // Enable fullscreen immediately (user just clicked, so user gesture is active)
     requestFullscreen();
     
-    // Start playing videos
-    initializePlayer();
+    // Small delay to ensure fullscreen is applied before starting video
+    setTimeout(() => {
+        // Start playing videos
+        initializePlayer();
+    }, 300);
 }
 
 // Start watching session
@@ -567,21 +570,25 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
-    // Mute first to ensure autoplay works (bypass browser policy)
-    event.target.mute();
+    // Try to play with sound first (user just clicked confirm button)
     event.target.playVideo();
     
-    // Unmute after video starts playing
-    setTimeout(() => {
-        event.target.unMute();
-    }, 500);
-    
-    // Fallback: ensure video plays after a short delay
+    // Fallback: if unmuted autoplay fails, try muted then unmute
     setTimeout(() => {
         if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
-            player.playVideo();
+            event.target.mute();
+            event.target.playVideo();
+            
+            // Try to unmute after playing starts
+            setTimeout(() => {
+                try {
+                    event.target.unMute();
+                } catch (e) {
+                    console.log('Unmute failed, keeping muted:', e);
+                }
+            }, 1000);
         }
-    }, 1000);
+    }, 500);
     
     startWatchTimer();
     
