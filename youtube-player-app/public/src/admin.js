@@ -344,6 +344,177 @@ async function initialize() {
     loadSettings();
     await initializeDummyVideos();
     renderVideoGrid();
+    setupImportPlaylistHandlers();
+    loadAutoLoadSettings();
+}
+
+// ==================== IMPORT PLAYLIST FUNCTIONS ====================
+
+// Setup import playlist event handlers
+function setupImportPlaylistHandlers() {
+    const loadFromUrlBtn = document.getElementById('loadFromUrl');
+    const loadFromFileBtn = document.getElementById('loadFromFile');
+    const playlistFileInput = document.getElementById('playlistFile');
+    const saveAutoLoadBtn = document.getElementById('saveAutoLoadSettings');
+
+    if (loadFromUrlBtn) {
+        loadFromUrlBtn.addEventListener('click', loadPlaylistFromUrl);
+    }
+
+    if (loadFromFileBtn && playlistFileInput) {
+        loadFromFileBtn.addEventListener('click', () => {
+            if (playlistFileInput.files.length > 0) {
+                loadPlaylistFromFile(playlistFileInput.files[0]);
+            } else {
+                showImportStatus('Pilih file terlebih dahulu', 'error');
+            }
+        });
+    }
+
+    if (saveAutoLoadBtn) {
+        saveAutoLoadBtn.addEventListener('click', saveAutoLoadSettings);
+    }
+}
+
+// Load playlist from URL
+async function loadPlaylistFromUrl() {
+    const urlInput = document.getElementById('playlistUrl');
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        showImportStatus('Masukkan URL terlebih dahulu', 'error');
+        return;
+    }
+
+    showImportStatus('Loading playlist dari URL...', 'loading');
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const text = await response.text();
+        await processPlaylistText(text);
+    } catch (error) {
+        showImportStatus(`Error loading dari URL: ${error.message}`, 'error');
+    }
+}
+
+// Load playlist from local file
+function loadPlaylistFromFile(file) {
+    showImportStatus('Reading file...', 'loading');
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const text = e.target.result;
+        await processPlaylistText(text);
+    };
+    reader.onerror = () => {
+        showImportStatus('Error reading file', 'error');
+    };
+    reader.readAsText(file);
+}
+
+// Process playlist text content
+async function processPlaylistText(text) {
+    const lines = text.split('\n');
+    const videos = [];
+    let processed = 0;
+    let errors = 0;
+
+    showImportStatus(`Processing ${lines.length} lines...`, 'loading');
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        
+        // Skip empty lines and comments
+        if (!trimmed || trimmed.startsWith('#')) continue;
+
+        // Parse line - format: URL or ID or ID|Title
+        let videoId = null;
+        let customTitle = null;
+
+        if (trimmed.includes('|')) {
+            const parts = trimmed.split('|');
+            videoId = extractVideoId(parts[0].trim());
+            customTitle = parts[1].trim();
+        } else {
+            videoId = extractVideoId(trimmed);
+        }
+
+        if (videoId) {
+            try {
+                const details = await getVideoDetails(videoId);
+                videos.push({
+                    id: details.id,
+                    title: customTitle || details.title,
+                    thumbnail: details.thumbnail,
+                    url: details.url,
+                    channelTitle: details.channelTitle
+                });
+                processed++;
+                showImportStatus(`Processed ${processed} videos...`, 'loading');
+            } catch (error) {
+                errors++;
+                console.error(`Error processing video ${videoId}:`, error);
+            }
+        }
+    }
+
+    if (videos.length > 0) {
+        videoList = videos;
+        saveToLocalStorage();
+        renderVideoGrid();
+        showImportStatus(
+            `✅ Successfully imported ${processed} videos!\n` +
+            (errors > 0 ? `⚠️ ${errors} videos failed to load` : ''),
+            'success'
+        );
+    } else {
+        showImportStatus('No valid videos found in file', 'error');
+    }
+}
+
+// Show import status message
+function showImportStatus(message, type = 'info') {
+    const statusDiv = document.getElementById('importStatus');
+    const contentDiv = document.getElementById('importStatusContent');
+    
+    if (statusDiv && contentDiv) {
+        statusDiv.style.display = 'block';
+        contentDiv.className = `status-${type}`;
+        contentDiv.textContent = message;
+    }
+}
+
+// Save auto-load settings
+function saveAutoLoadSettings() {
+    const enableAutoLoad = document.getElementById('enableAutoLoad').checked;
+    const autoLoadUrl = document.getElementById('autoLoadUrl').value.trim();
+
+    const autoLoadSettings = {
+        enabled: enableAutoLoad,
+        url: autoLoadUrl
+    };
+
+    localStorage.setItem('autoLoadSettings', JSON.stringify(autoLoadSettings));
+    showStatusMessage('Auto-load settings saved!', 'success');
+}
+
+// Load auto-load settings
+function loadAutoLoadSettings() {
+    const autoLoadSettings = JSON.parse(localStorage.getItem('autoLoadSettings') || '{}');
+    
+    const enableCheckbox = document.getElementById('enableAutoLoad');
+    const urlInput = document.getElementById('autoLoadUrl');
+
+    if (enableCheckbox && autoLoadSettings.enabled !== undefined) {
+        enableCheckbox.checked = autoLoadSettings.enabled;
+    }
+
+    if (urlInput && autoLoadSettings.url) {
+        urlInput.value = autoLoadSettings.url;
+    }
 }
 
 // Start the app

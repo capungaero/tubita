@@ -38,11 +38,84 @@ const unlockBtn = document.getElementById('unlock-btn');
 const unlockError = document.getElementById('unlock-error');
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Auto-load playlist from URL if enabled
+    await autoLoadPlaylistFromUrl();
+    
     initializeApp();
     // Auto fullscreen on first load
     requestFullscreen();
 });
+
+// Auto-load playlist from URL
+async function autoLoadPlaylistFromUrl() {
+    const autoLoadSettings = JSON.parse(localStorage.getItem('autoLoadSettings') || '{}');
+    
+    // If auto-load is disabled, skip
+    if (!autoLoadSettings.enabled) {
+        return;
+    }
+
+    const url = autoLoadSettings.url || 'https://capung.web.id/tubita/tubita.txt';
+    
+    console.log('Auto-loading playlist from:', url);
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error('Failed to load playlist:', response.status);
+            return;
+        }
+
+        const text = await response.text();
+        const videos = await parsePlaylistText(text);
+        
+        if (videos.length > 0) {
+            videoList = videos;
+            localStorage.setItem('videoList', JSON.stringify(videoList));
+            console.log(`Auto-loaded ${videos.length} videos from URL`);
+        }
+    } catch (error) {
+        console.error('Error auto-loading playlist:', error);
+    }
+}
+
+// Parse playlist text content
+async function parsePlaylistText(text) {
+    const lines = text.split('\n');
+    const videos = [];
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        
+        // Skip empty lines and comments
+        if (!trimmed || trimmed.startsWith('#')) continue;
+
+        // Parse line - format: URL or ID or ID|Title
+        let videoId = null;
+        let customTitle = null;
+
+        if (trimmed.includes('|')) {
+            const parts = trimmed.split('|');
+            videoId = extractVideoId(parts[0].trim());
+            customTitle = parts[1].trim();
+        } else {
+            videoId = extractVideoId(trimmed);
+        }
+
+        if (videoId) {
+            // Add video with basic info (thumbnail will load later)
+            videos.push({
+                id: videoId,
+                title: customTitle || `Video ${videoId}`,
+                thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                channelTitle: 'YouTube'
+            });
+        }
+    }
+
+    return videos;
+}
 
 // Request fullscreen function
 function requestFullscreen() {

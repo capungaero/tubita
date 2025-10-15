@@ -1,0 +1,40 @@
+# TUBITA PLAYLIST
+# Format: YouTube URL atau Video ID (satu per baris)
+# Komentar dimulai dengan #
+# Format dengan title: VIDEO_ID|Custom Title
+
+# Baby Shark & Popular Kids Songs
+XqZsoesa55w|Baby Shark Dance - Pinkfong
+e_04ZrNroTo|Animal Songs - Pinkfong
+yCjJyiqpAuU|Twinkle Twinkle Little Star
+
+# Cocomelon
+hq3yfQnllfQ|Itsy Bitsy Spider - Cocomelon
+DCW06EJXf9I|Wheels on the Bus - Cocomelon
+https://www.youtube.com/watch?v=7kvxIaXqDiQ
+https://www.youtube.com/watch?v=T-5yA1q_qPw
+
+# Nussa Official (Islamic Kids)
+Ae0x0rwKDis|Nussa: Jangan Marah
+B0dP0L_qVi8|Nussa: Berbagi Itu Indah
+h0Tz0v4AQBU|Nussa: Sabar dan Ikhlas
+
+# Omar & Hana (Islamic Songs)
+b09lBhcv0eA|Asmaul Husna - Omar & Hana
+NdJSVGrzEd8|Bismillah Song
+TL1fRF1fZlY
+
+# Peppa Pig
+veBfjFl-HHQ
+NU2mU6z_HoQ
+xSGgXgw-e0k
+
+# Educational Videos
+gUbw0oSCiqc|Do You Like Broccoli?
+tVlcKp3bWH8|Walking Walking Song
+l4WNrvVjiTw|How is the Weather?
+
+# Indonesian Kids Songs
+RXtZ48BW1E8|Balonku Ada Lima
+wuI-dEEVr-c|Bintang Kecil
+SGCirRdCLxM|Topi Saya Bundar
