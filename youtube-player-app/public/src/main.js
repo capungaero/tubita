@@ -43,8 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await autoLoadPlaylistFromUrl();
     
     initializeApp();
-    // Auto fullscreen on first load
-    requestFullscreen();
+    
+    // Load available videos after auto-load
+    loadAvailableVideos();
 });
 
 // Auto-load playlist from URL
@@ -333,6 +334,9 @@ function startWatchingSession() {
     
     // Hide login popup
     loginPopup.classList.remove('active');
+    
+    // Auto fullscreen when starting session
+    requestFullscreen();
     
     // Start playing videos
     initializePlayer();
