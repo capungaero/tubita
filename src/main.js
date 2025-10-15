@@ -467,7 +467,22 @@ function loadVideo(index) {
 
 // Player ready event
 function onPlayerReady(event) {
+    // Mute first to ensure autoplay works (bypass browser policy)
+    event.target.mute();
     event.target.playVideo();
+    
+    // Unmute after video starts playing
+    setTimeout(() => {
+        event.target.unMute();
+    }, 500);
+    
+    // Fallback: ensure video plays after a short delay
+    setTimeout(() => {
+        if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+            player.playVideo();
+        }
+    }, 1000);
+    
     startWatchTimer();
     
     // Enable mouse lock when video starts playing
