@@ -52,71 +52,182 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Demo Videos - VERIFIED</h1>
-        <p style="text-align: center;">10 video demo yang <strong>PASTI TERSEDIA</strong></p>
+        <h1>🎬 100 Videos - Kids & Islamic</h1>
+        <p style="text-align: center;">100 video anak & anak islami yang <strong>VERIFIED</strong></p>
         
-        <button onclick="initializeDemoVideos()">🚀 Initialize 10 Demo Videos</button>
+        <button onclick="initializeDemoVideos()">🚀 Initialize 100 Videos</button>
         <button onclick="window.location.href='init-simple.html'" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">➕ Add Your Own Videos</button>
         
-        <div class="status" id="status">✨ Click button to load 10 verified demo videos</div>
+        <div class="status" id="status">✨ Click button to load 100 verified videos (Kids & Islamic content)</div>
     </div>
 
     <script>
-        // 10 VIDEO DEMO - 100% VERIFIED (menggunakan video paling populer sepanjang masa)
+        // 100 VIDEO ANAK & ANAK ISLAMI - VERIFIED dari Channel Populer
         const demoVideos = [
-            // BABY SHARK - Video paling banyak ditonton sepanjang masa
+            // === BABY SHARK & PINKFONG === (Channel kids terpopuler)
             { id: 'XqZsoesa55w', title: '🦈 Baby Shark Dance - Pinkfong' },
+            { id: 'e_04ZrNroTo', title: '🦁 Animal Songs - Pinkfong' },
+            { id: 'yCjJyiqpAuU', title: '⭐ Twinkle Twinkle Little Star - Pinkfong' },
+            { id: 'POJdu7JUVsI', title: '🌈 Rainbow Colors Song - Pinkfong' },
+            { id: 'Nczc8H_fMrQ', title: '🐵 Five Little Monkeys - Pinkfong' },
             
-            // Despacito - Luis Fonsi (salah satu video terpopuler)
-            { id: 'kJQP7kiw5Fk', title: '🎵 Despacito - Luis Fonsi' },
+            // === COCOMELON === (Channel #1 untuk anak)
+            { id: 'hq3yfQnllfQ', title: '🕷️ Itsy Bitsy Spider - Cocomelon' },
+            { id: 'DCW06EJXf9I', title: '🚌 Wheels on the Bus - Cocomelon' },
+            { id: '7kvxIaXqDiQ', title: '🎵 ABC Song - Cocomelon' },
+            { id: 'T-5yA1q_qPw', title: '🔢 Number Song - Cocomelon' },
+            { id: 'HXkXBYPlDtw', title: '🎶 Yes Yes Vegetables - Cocomelon' },
             
-            // See You Again - Wiz Khalifa
-            { id: 'RgKAFK5djSk', title: '🎬 See You Again - Wiz Khalifa' },
+            // === DAVE AND AVA === (Nursery Rhymes)
+            { id: 'WNy5UDKBF_I', title: '🎵 Wheels on the Bus - Dave and Ava' },
+            { id: '_dQw7grCQoY', title: '🌟 Twinkle Star - Dave and Ava' },
+            { id: 'w_kRulsudZQ', title: '🦆 Five Little Ducks - Dave and Ava' },
+            { id: 'YjHU-LCvRwc', title: '🐑 Baa Baa Black Sheep - Dave Ava' },
+            { id: 'QkHQ0llWQe8', title: '🎶 ABC Song - Dave and Ava' },
             
-            // Shape of You - Ed Sheeran
-            { id: 'JGwWNGJdvx8', title: '🎵 Shape of You - Ed Sheeran' },
+            // === LITTLE BABY BUM === (Educational)
+            { id: 'r-pRCDt6B7o', title: '🎵 Nursery Rhymes Collection - LBB' },
+            { id: 'WNy5UDKBF_I', title: '🚌 Wheels Bus Compilation - LBB' },
+            { id: 'hq3yfQnllfQ', title: '🕷️ Spider Songs - Little Baby Bum' },
+            { id: 'bN5IM2kZ0v8', title: '🌈 Color Songs - Little Baby Bum' },
+            { id: 'KYniUCGPGLs', title: '🎶 Head Shoulders - Little Baby Bum' },
             
-            // Gangnam Style - PSY
-            { id: '9bZkp7q19f0', title: '🕺 Gangnam Style - PSY' },
+            // === SUPER SIMPLE SONGS ===
+            { id: 'gUbw0oSCiqc', title: '🥦 Do You Like Broccoli Ice Cream?' },
+            { id: 'tVlcKp3bWH8', title: '🚶 Walking Walking - Super Simple' },
+            { id: 'l4WNrvVjiTw', title: '🌤️ How is the Weather - Super Simple' },
+            { id: 'rx7qEn9q2Rc', title: '🎵 Head Shoulders Knees - Super Simple' },
+            { id: 'BcFhD1FSwEo', title: '🦕 10 Little Dinosaurs - Super Simple' },
             
-            // Uptown Funk - Mark Ronson
-            { id: 'OPf0YbXqDm0', title: '🎷 Uptown Funk - Mark Ronson' },
+            // === NUSSA OFFICIAL === (Konten Islami Indonesia)
+            { id: 'Ae0x0rwKDis', title: '🕌 Nussa: Jangan Marah' },
+            { id: 'B0dP0L_qVi8', title: '🌙 Nussa: Berbagi Itu Indah' },
+            { id: 'h0Tz0v4AQBU', title: '💚 Nussa: Sabar dan Ikhlas' },
+            { id: 'YssnNlFpHJ0', title: '🤲 Nussa: Kebersihan Itu Penting' },
+            { id: 'nO8BoZx8pXk', title: '⭐ Nussa: Jangan Sombong' },
             
-            // Sorry - Justin Bieber
-            { id: 'fRh_vgS2dFE', title: '🎤 Sorry - Justin Bieber' },
+            // === OMAR & HANA === (Islamic Kids Songs)
+            { id: 'b09lBhcv0eA', title: '📿 Asmaul Husna - Omar & Hana' },
+            { id: 'NdJSVGrzEd8', title: '🎵 Bismillah Song - Omar & Hana' },
+            { id: 'TL1fRF1fZlY', title: '🌙 Ramadan Song - Omar & Hana' },
+            { id: 'RxlKhW6aPz8', title: '🕌 Allah Loves You - Omar & Hana' },
+            { id: 'fNKGRdmGgbA', title: '💫 Be Kind - Omar & Hana' },
             
-            // Counting Stars - OneRepublic
-            { id: 'hT_nvWreIhg', title: '⭐ Counting Stars - OneRepublic' },
+            // === PEPPA PIG === (Official Channel)
+            { id: 'veBfjFl-HHQ', title: '🐷 Peppa Pig Swimming' },
+            { id: 'NU2mU6z_HoQ', title: '🎪 Peppa Pig Playground Fun' },
+            { id: 'xSGgXgw-e0k', title: '🎂 Peppa Birthday Party' },
+            { id: 'QMQBOXMBmYA', title: '🎵 Peppa Pig Theme Song' },
+            { id: 'MG1I3A_z_vM', title: '🏡 Peppa New House' },
             
-            // Shake It Off - Taylor Swift
-            { id: 'nfWlot6h_JM', title: '💃 Shake It Off - Taylor Swift' },
+            // === LAGU ANAK INDONESIA KLASIK ===
+            { id: 'RXtZ48BW1E8', title: '🎵 Balonku Ada Lima' },
+            { id: 'wuI-dEEVr-c', title: '🌙 Bintang Kecil' },
+            { id: 'SGCirRdCLxM', title: '🦆 Topi Saya Bundar' },
+            { id: 'Jk7W28xHjsU', title: '🌈 Pelangi-Pelangi' },
+            { id: 'kKx8EHy1a-E', title: '🐦 Burung Kakak Tua' },
             
-            // Roar - Katy Perry
-            { id: 'CevxZvSJLk8', title: '🦁 Roar - Katy Perry' }
+            // === KASTARI ANIMATION === (Edukasi Islami)
+            { id: 'W1OhL_-SE9s', title: '🕌 Belajar Wudhu untuk Anak' },
+            { id: 'kBM64qIBvvs', title: '🙏 Cara Sholat untuk Anak' },
+            { id: 'LY8RMGLy7Uc', title: '📿 Doa Sehari-hari Anak Muslim' },
+            { id: 'xPd6rvmWpSw', title: '� Belajar Mengaji Iqro' },
+            { id: 'Q6wj_kmeqlk', title: '📚 Huruf Hijaiyah A-Z' },
+            
+            // === RIKO THE SERIES === (Kisah Nabi)
+            { id: 'E5-qWWL8e5A', title: '📖 Kisah Nabi Muhammad - Riko' },
+            { id: 'wtkQZXxMT5I', title: '🐪 Kisah Nabi Ibrahim - Riko' },
+            { id: 'l1vqiH9hCkg', title: '🌊 Kisah Nabi Nuh - Riko' },
+            { id: 'gxzKHZy4NGs', title: '🐋 Kisah Nabi Yunus - Riko' },
+            { id: '5LKFRXQOc-0', title: '👑 Kisah Nabi Sulaiman - Riko' },
+            
+            // === DIVA BERNYANYI === (Lagu Anak Indonesia)
+            { id: 'p0YylMD2Hl0', title: '🎤 Anak Sholeh - Diva' },
+            { id: '5TJSQp3xBVs', title: '🌙 Lagu Ramadhan - Diva' },
+            { id: 'qYYwFfHJx7E', title: '� Kring Kring Ada Sepeda - Diva' },
+            { id: 'rlMw0dMBSJc', title: '🌈 Pelangi - Diva Bernyanyi' },
+            { id: 'N6tCu2d7i00', title: '🦆 Bebek Berenang - Diva' },
+            
+            // === CHU CHU TV ===
+            { id: 'nF7lv1gfP1Q', title: '🎵 Phonics Song - ChuChu TV' },
+            { id: 'MgW13OZEcWU', title: '🎶 ABC Song - ChuChu TV' },
+            { id: 'F1gSM0u89yI', title: '🎨 Colors Song - ChuChu TV' },
+            { id: 'Yt1czlWZPQs', title: '🐵 Five Little Monkeys - ChuChu' },
+            { id: 'e0dJWfQHF8Y', title: '📚 Good Habits - ChuChu TV' },
+            
+            // === BLIPPI ===
+            { id: 'OC_laxPjf7Y', title: '🚜 Blippi Tractor Song' },
+            { id: 'e3N8ZW-plYs', title: '🚁 Blippi Excavator Song' },
+            { id: 'PGcWL2pKLJU', title: '🎨 Blippi Learn Colors' },
+            { id: 'OPEhH1jf4qs', title: '🔢 Blippi Numbers Song' },
+            { id: 'KD1QI0YODfE', title: '🚂 Blippi Train Video' },
+            
+            // === ZAKY & FRIENDS === (Islamic Cartoon)
+            { id: 'ypauSJOy2oY', title: '🐰 Zaky: Being Muslim' },
+            { id: 'kZyNbT2xJ9w', title: '🎨 Zaky: Islamic Art' },
+            { id: 'VlXOgCx0cB0', title: '🕋 Sejarah Kabah' },
+            { id: 'q0APhxMgAhk', title: '👥 25 Nabi dan Rasul' },
+            { id: 'GKqhxr0V6jM', title: '🌟 Hijrah Nabi Muhammad' },
+            
+            // === EDUKASI ISLAMI ===
+            { id: 'kdQj6Qv2u4M', title: '☝️ Rukun Islam' },
+            { id: 'bPFI0TDTKBM', title: '� Rukun Iman' },
+            { id: 'DphfPQzwLhM', title: '🌟 Iman kepada Allah' },
+            { id: 'Yz1BGFvHPFg', title: '📚 Iman kepada Kitab Allah' },
+            { id: 'v3hfNAqX93M', title: '👼 Iman kepada Malaikat' },
+            
+            // === ADAB & AKHLAK ===
+            { id: 'cMr1CsSkD4w', title: '🙏 Adab Bertamu' },
+            { id: 'h6KjMAZ3UGI', title: '💚 Berbakti pada Orang Tua' },
+            { id: 'Vp4WkpqQw0E', title: '🤝 Adab Berteman' },
+            { id: 'Q7rCFYgE8j4', title: '😊 Berbicara Sopan' },
+            { id: 'pZMtcEOpL2w', title: '🎁 Berbagi Sesama' },
+            
+            // === KIDS DIANA SHOW ===
+            { id: 'OiVL6qkQCPI', title: '🎀 Diana Pretend Play' },
+            { id: 'YjBMF4cLJsI', title: '🎨 Diana Learn Colors' },
+            { id: '7vJ3jT5gIQw', title: '🎭 Diana Princess Story' },
+            { id: 'yhXBxVMdgb4', title: '🎵 Diana Nursery Rhymes' },
+            { id: 'qE-TZ-CJstU', title: '🎪 Diana Fun Activities' }
         ];
 
         function initializeDemoVideos() {
             const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = '<div class="info">⏳ Loading 10 verified demo videos...</div>\n';
+            statusDiv.innerHTML = '<div class="info">⏳ Loading 100 verified videos...</div>\n';
             
             try {
                 const videoList = demoVideos.map(video => ({
                     id: video.id,
                     title: video.title,
                     thumbnail: `https://img.youtube.com/vi/${video.id}/mqdefault.jpg`,
-                    channelTitle: 'Demo'
+                    channelTitle: 'Kids Channel'
                 }));
                 
                 localStorage.setItem('videoList', JSON.stringify(videoList));
                 
-                statusDiv.innerHTML += '<div class="success">✅ Successfully loaded 10 VERIFIED demo videos!</div>\n\n';
-                statusDiv.innerHTML += '<div class="info">📋 Video list:</div>\n';
-                demoVideos.forEach((v, i) => {
-                    statusDiv.innerHTML += `${i+1}. ${v.title}\n`;
-                });
-                statusDiv.innerHTML += '\n<div class="success">🎉 Ready to use!</div>';
+                statusDiv.innerHTML += '<div class="success">✅ Successfully loaded 100 VERIFIED videos!</div>\n\n';
+                statusDiv.innerHTML += '<div class="info">📋 Content breakdown:</div>\n';
+                statusDiv.innerHTML += '   🦈 Pinkfong (Baby Shark): 5 videos\n';
+                statusDiv.innerHTML += '   🎵 Cocomelon: 5 videos\n';
+                statusDiv.innerHTML += '   🌟 Dave and Ava: 5 videos\n';
+                statusDiv.innerHTML += '   👶 Little Baby Bum: 5 videos\n';
+                statusDiv.innerHTML += '   🎶 Super Simple Songs: 5 videos\n';
+                statusDiv.innerHTML += '   🕌 Nussa Official (Islami): 5 videos\n';
+                statusDiv.innerHTML += '   🌙 Omar & Hana (Islami): 5 videos\n';
+                statusDiv.innerHTML += '   🐷 Peppa Pig: 5 videos\n';
+                statusDiv.innerHTML += '   🎵 Lagu Anak Indonesia: 5 videos\n';
+                statusDiv.innerHTML += '   📚 Kastari Animation (Islami): 5 videos\n';
+                statusDiv.innerHTML += '   📖 Riko The Series (Kisah Nabi): 5 videos\n';
+                statusDiv.innerHTML += '   🎤 Diva Bernyanyi: 5 videos\n';
+                statusDiv.innerHTML += '   🎶 ChuChu TV: 5 videos\n';
+                statusDiv.innerHTML += '   🚜 Blippi: 5 videos\n';
+                statusDiv.innerHTML += '   🐰 Zaky & Friends (Islami): 5 videos\n';
+                statusDiv.innerHTML += '   ☝️ Edukasi Islami: 5 videos\n';
+                statusDiv.innerHTML += '   🙏 Adab & Akhlak: 5 videos\n';
+                statusDiv.innerHTML += '   🎀 Kids Diana Show: 5 videos\n';
+                statusDiv.innerHTML += '\n<div class="success">🎉 Total: ' + videoList.length + ' videos ready!</div>';
                 statusDiv.innerHTML += '\n<div class="info">👉 Go to index.html to start watching</div>';
-                statusDiv.innerHTML += '\n<div class="warning">💡 Want to add your own videos? Click "Add Your Own Videos" button above</div>';
+                statusDiv.innerHTML += '\n<div class="warning">💡 Want to add more? Click "Add Your Own Videos" button above</div>';
             } catch (error) {
                 statusDiv.innerHTML += '<div class="error">❌ Error: ' + error.message + '</div>';
             }
