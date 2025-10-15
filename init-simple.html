@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Initialize Videos - Tubita (SIMPLE)</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            font-size: 2.5em;
+        }
+        .instruction {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ff9800;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06ffd 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 12px 0;
+            transition: all 0.3s ease;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .status {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+        .info { color: #3498db; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Initialize Videos - Manual Entry</h1>
+        
+        <div class="warning">
+            <h3>⚠️ PENTING!</h3>
+            <p>Karena banyak video ID tidak valid, silakan <strong>masukkan URL YouTube sendiri</strong> yang sudah Anda verifikasi bisa diputar.</p>
+        </div>
+
+        <div class="instruction">
+            <h3>📋 Cara Penggunaan:</h3>
+            <ol>
+                <li>Buka YouTube dan cari video anak yang ingin ditambahkan</li>
+                <li>Copy URL video (contoh: https://www.youtube.com/watch?v=dQw4w9WgXcQ)</li>
+                <li>Paste di textarea di bawah (satu URL per baris)</li>
+                <li>Klik "Process URLs"</li>
+            </ol>
+        </div>
+
+        <h3>Paste YouTube URLs (satu per baris):</h3>
+        <textarea id="urlInput" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ
+https://www.youtube.com/watch?v=abc123
+https://www.youtube.com/watch?v=xyz789"></textarea>
+
+        <button onclick="processUrls()">🚀 Process URLs and Save</button>
+        <button onclick="clearVideos()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">🗑️ Clear All Videos</button>
+        <button onclick="viewVideos()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">👁️ View Current Videos</button>
+
+        <div class="status" id="status">✨ Ready to process YouTube URLs...</div>
+    </div>
+
+    <script>
+        function extractVideoId(url) {
+            // Extract video ID from various YouTube URL formats
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+                /^([a-zA-Z0-9_-]{11})$/  // Direct ID
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        function processUrls() {
+            const statusDiv = document.getElementById('status');
+            const urls = document.getElementById('urlInput').value.trim().split('\n');
+            
+            if (urls.length === 0 || urls[0] === '') {
+                statusDiv.innerHTML = '<div class="error">❌ Please enter at least one YouTube URL!</div>';
+                return;
+            }
+
+            statusDiv.innerHTML = '<div class="info">⏳ Processing URLs...</div>\n';
+            const videoList = [];
+            let successCount = 0;
+            let failCount = 0;
+
+            urls.forEach((url, index) => {
+                const trimmedUrl = url.trim();
+                if (trimmedUrl === '') return;
+
+                const videoId = extractVideoId(trimmedUrl);
+                
+                if (videoId) {
+                    videoList.push({
+                        id: videoId,
+                        title: `🎬 Video ${index + 1}`,
+                        thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                        channelTitle: 'YouTube'
+                    });
+                    statusDiv.innerHTML += `<div class="success">✅ Added: ${videoId}</div>\n`;
+                    successCount++;
+                } else {
+                    statusDiv.innerHTML += `<div class="error">❌ Invalid URL: ${trimmedUrl}</div>\n`;
+                    failCount++;
+                }
+            });
+
+            if (videoList.length > 0) {
+                localStorage.setItem('videoList', JSON.stringify(videoList));
+                statusDiv.innerHTML += `\n<div class="success">🎉 Successfully saved ${successCount} videos!</div>\n`;
+                statusDiv.innerHTML += `<div class="info">👉 Go to index.html to start watching</div>`;
+            }
+
+            if (failCount > 0) {
+                statusDiv.innerHTML += `<div class="error">⚠️ Failed to process ${failCount} URLs</div>`;
+            }
+        }
+
+        function clearVideos() {
+            if (confirm('⚠️ Clear all videos?')) {
+                localStorage.removeItem('videoList');
+                document.getElementById('status').innerHTML = '<div class="success">🗑️ All videos cleared!</div>';
+                document.getElementById('urlInput').value = '';
+            }
+        }
+
+        function viewVideos() {
+            const statusDiv = document.getElementById('status');
+            const videoList = JSON.parse(localStorage.getItem('videoList') || '[]');
+            
+            if (videoList.length === 0) {
+                statusDiv.innerHTML = '<div class="error">⚠️ No videos found!</div>';
+                return;
+            }
+            
+            statusDiv.innerHTML = `<div class="success">📺 Current videos (${videoList.length}):</div>\n\n`;
+            videoList.forEach((video, index) => {
+                statusDiv.innerHTML += `${index + 1}. ${video.title}\n`;
+                statusDiv.innerHTML += `   ID: ${video.id}\n`;
+                statusDiv.innerHTML += `   URL: https://youtube.com/watch?v=${video.id}\n\n`;
+            });
+        }
+    </script>
+</body>
+</html>
