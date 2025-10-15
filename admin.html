@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Kids YouTube Player</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="admin-header-content">
+            <div class="logo">
+                <i class="fab fa-youtube"></i>
+                <span>Kids YouTube Admin</span>
+            </div>
+            <a href="index.html" class="btn-back">
+                <i class="fas fa-home"></i> Ke Player
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav>
+                <a href="#playlist" class="nav-item active" data-section="playlist">
+                    <i class="fas fa-list"></i>
+                    <span>Playlist</span>
+                </a>
+                <a href="#settings" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Pengaturan Waktu</span>
+                </a>
+                <a href="#add-video" class="nav-item" data-section="add-video">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Tambah Video</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="admin-content">
+            <!-- Status Message -->
+            <div id="statusMessage" class="status-message"></div>
+
+            <!-- Playlist Section -->
+            <section id="playlist-section" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Daftar Video Playlist</h2>
+                    <div class="header-actions">
+                        <span class="video-count">Total: <strong id="videoCount">0</strong> video</span>
+                    </div>
+                </div>
+                
+                <div id="videoGrid" class="video-grid">
+                    <!-- Video cards will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-cog"></i> Pengaturan Pembatasan Waktu</h2>
+                </div>
+                
+                <div class="settings-container">
+                    <div class="setting-card">
+                        <div class="setting-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="setting-content">
+                            <h3>Batas Waktu Menonton</h3>
+                            <p>Tentukan berapa lama anak dapat menonton video sebelum diminta password</p>
+                            <div class="time-input-group">
+                                <input type="number" id="timeLimitMinutes" min="1" max="180" value="30" placeholder="Menit">
+                                <span class="unit">menit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div class="setting-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="setting-content">
+                            <h3>Password Admin</h3>
+                            <p>Password untuk melanjutkan menonton setelah waktu habis</p>
+                            <div class="password-input-group">
+                                <input type="password" id="adminPassword" placeholder="Masukkan password baru">
+                                <button type="button" id="togglePassword" class="btn-toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div class="setting-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="setting-content">
+                            <h3>Peringatan Waktu</h3>
+                            <p>Tampilkan peringatan beberapa menit sebelum waktu habis</p>
+                            <div class="time-input-group">
+                                <input type="number" id="warningTime" min="1" max="30" value="5" placeholder="Menit">
+                                <span class="unit">menit sebelumnya</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div class="setting-icon">
+                            <i class="fas fa-list-ol"></i>
+                        </div>
+                        <div class="setting-content">
+                            <h3>Maksimal Video Per Sesi</h3>
+                            <p>Jumlah maksimal video yang bisa dipilih anak per sesi</p>
+                            <div class="time-input-group">
+                                <input type="number" id="maxVideosPerSession" min="1" max="20" value="3" placeholder="Jumlah">
+                                <span class="unit">video</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="saveSettings" class="btn-save-settings">
+                        <i class="fas fa-save"></i> Simpan Pengaturan
+                    </button>
+                </div>
+            </section>
+
+            <!-- Add Video Section -->
+            <section id="add-video-section" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle"></i> Tambah Video Baru</h2>
+                </div>
+                
+                <div class="add-video-container">
+                    <form id="addVideoForm" class="add-video-form">
+                        <div class="form-group">
+                            <label for="videoUrl">
+                                <i class="fab fa-youtube"></i> URL Video YouTube
+                            </label>
+                            <input 
+                                type="text" 
+                                id="videoUrl" 
+                                placeholder="https://www.youtube.com/watch?v=..." 
+                                required
+                            >
+                            <small>Contoh: https://www.youtube.com/watch?v=dQw4w9WgXcQ</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="videoTitle">
+                                <i class="fas fa-heading"></i> Judul Video (Opsional)
+                            </label>
+                            <input 
+                                type="text" 
+                                id="videoTitle" 
+                                placeholder="Kosongkan untuk mengambil judul otomatis"
+                            >
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-add-video">
+                                <i class="fas fa-plus"></i> Tambah ke Playlist
+                            </button>
+                            <button type="button" id="resetForm" class="btn-reset">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="video-preview" id="videoPreview" style="display: none;">
+                        <h3>Preview Video</h3>
+                        <div class="preview-card">
+                            <img id="previewThumbnail" src="" alt="Video thumbnail">
+                            <div class="preview-info">
+                                <h4 id="previewTitle"></h4>
+                                <p id="previewId"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="src/admin.js"></script>
+</body>
+</html>

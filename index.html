@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Tubita - YouTube Player Anak 🌈</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <header class="player-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span style="font-size: 2em;">🎬</span>
+                    <span style="font-weight: bold; font-size: 1.5em; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Tubita</span>
+                    <span style="font-size: 1.5em;">🌈</span>
+                </div>
+                <a href="admin.html" class="admin-link">
+                    <i class="fas fa-cog"></i> Admin Panel
+                </a>
+            </div>
+        </header>
+        
+        <div id="video-container" class="video-container-main">
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading video player...</p>
+            </div>
+        </div>
+        
+        <!-- Login Popup -->
+        <div id="login-popup" class="modal active">
+            <div class="modal-content login-modal">
+                <h2>🎉 Selamat Datang! 🎉</h2>
+                <p>✨ Masukkan nama dan pilih video yang ingin ditonton ✨</p>
+                
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="username">Nama Kamu:</label>
+                        <input type="text" id="username" placeholder="Masukkan nama..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📺 Pilih Video (max: <span id="max-videos">3</span> video):</label>
+                        <div id="video-selection" class="video-grid">
+                            <!-- Videos will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="selected-info">
+                        <p>🎯 Video dipilih: <span id="selected-count">0</span>/<span id="max-videos-2">3</span></p>
+                    </div>
+                    
+                    <button id="start-watching" class="btn-primary" disabled>
+                        <i class="fas fa-play-circle"></i> 🚀 Mulai Menonton!
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- End Session Modal -->
+        <div id="end-session-modal" class="modal">
+            <div class="modal-content end-modal">
+                <div class="end-icon">⏰</div>
+                <h2>⏱️ Waktu Menonton Telah Habis! ⏱️</h2>
+                <p id="end-message">Waktu menonton kamu sudah selesai.</p>
+                
+                <div class="password-unlock">
+                    <label>🔐 Password Admin untuk Unlock:</label>
+                    <input type="password" id="unlock-password" placeholder="Masukkan password...">
+                    <button id="unlock-btn" class="btn-primary">
+                        <i class="fas fa-unlock-alt"></i> 🔓 Unlock
+                    </button>
+                    <p class="error-message" id="unlock-error"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="warning-modal" class="modal"></div>
+        <div id="password-prompt" class="modal"></div>
+    </div>
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

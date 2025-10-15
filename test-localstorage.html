@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test localStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .danger:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test localStorage Data</h1>
+    
+    <div class="section">
+        <h2>Video List</h2>
+        <pre id="videoList">Loading...</pre>
+    </div>
+    
+    <div class="section">
+        <h2>Settings</h2>
+        <pre id="settings">Loading...</pre>
+    </div>
+    
+    <div class="section">
+        <h2>Actions</h2>
+        <button onclick="location.reload()">🔄 Refresh</button>
+        <button onclick="openAdmin()">⚙️ Open Admin Panel</button>
+        <button onclick="openMain()">🏠 Open Main App</button>
+        <button class="danger" onclick="clearData()">🗑️ Clear All Data</button>
+    </div>
+
+    <script>
+        function loadData() {
+            const videoList = localStorage.getItem('videoList');
+            const settings = localStorage.getItem('settings');
+            
+            document.getElementById('videoList').textContent = videoList 
+                ? JSON.stringify(JSON.parse(videoList), null, 2)
+                : '❌ No video list found in localStorage';
+                
+            document.getElementById('settings').textContent = settings
+                ? JSON.stringify(JSON.parse(settings), null, 2)
+                : '❌ No settings found in localStorage';
+                
+            // Show count
+            if (videoList) {
+                const videos = JSON.parse(videoList);
+                document.getElementById('videoList').textContent = 
+                    `✅ Found ${videos.length} videos:\n\n` + 
+                    JSON.stringify(videos, null, 2);
+            }
+        }
+        
+        function clearData() {
+            if (confirm('⚠️ Hapus semua data di localStorage?\n\nData video dan settings akan hilang!')) {
+                localStorage.clear();
+                alert('✅ Data berhasil dihapus!');
+                location.reload();
+            }
+        }
+        
+        function openAdmin() {
+            window.open('admin.html', '_blank');
+        }
+        
+        function openMain() {
+            window.open('index.html', '_blank');
+        }
+        
+        // Load on page load
+        loadData();
+        
+        // Auto-refresh every 5 seconds
+        setInterval(loadData, 5000);
+    </script>
+</body>
+</html>
