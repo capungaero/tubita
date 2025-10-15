@@ -63,8 +63,8 @@ async function autoLoadPlaylistFromUrl() {
         url = 'https://' + url;
     }
     
-    // Use CORS proxy to bypass CORS restrictions
-    const corsProxy = 'https://corsproxy.io/?';
+    // Use AllOrigins CORS proxy
+    const corsProxy = 'https://api.allorigins.win/raw?url=';
     const proxiedUrl = corsProxy + encodeURIComponent(url);
     
     console.log('Auto-loading playlist from:', url);
