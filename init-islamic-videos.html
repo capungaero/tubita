@@ -281,6 +281,30 @@
 
         // Update count on load
         document.getElementById('videoCount').textContent = kidsVideos.length;
+        
+        // AUTO CHECK & CLEAR OLD DATA on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const videoList = JSON.parse(localStorage.getItem('videoList') || '[]');
+            const statusDiv = document.getElementById('status');
+            
+            if (videoList.length > 0) {
+                // Check if data is old (different from current kidsVideos)
+                const currentIds = kidsVideos.map(v => v.id);
+                const storedIds = videoList.map(v => v.id);
+                const hasOldData = !storedIds.every(id => currentIds.includes(id));
+                
+                if (hasOldData) {
+                    statusDiv.innerHTML = '<div class="warning">⚠️ DETECTED OLD/INVALID DATA!</div>\n';
+                    statusDiv.innerHTML += '<div class="info">🔄 Auto-clearing old videos...</div>\n';
+                    localStorage.removeItem('videoList');
+                    statusDiv.innerHTML += '<div class="success">✅ Old data cleared!</div>\n';
+                    statusDiv.innerHTML += '<div class="info">👉 Click "Initialize 100 Videos" to load NEW verified videos</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="success">✅ Current data is up-to-date (' + videoList.length + ' videos)</div>\n';
+                    statusDiv.innerHTML += '<div class="info">Ready to use! Or re-initialize to refresh.</div>';
+                }
+            }
+        });
     </script>
 </body>
 </html>
